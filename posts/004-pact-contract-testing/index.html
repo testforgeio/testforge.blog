@@ -1,0 +1,761 @@
+<!DOCTYPE html><html lang="en" class="scroll-smooth"> <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width"><link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="canonical" href="https://testforge.blog/posts/004-pact-contract-testing/"><meta name="generator" content="Astro v4.16.18"><!-- General Meta Tags --><title>Contract Testing using Pact | testforge</title><meta name="title" content="Contract Testing using Pact | testforge"><meta name="description" content="A concise guide to using Pact for consumer‑driven contract testing between TypeScript frontends and Java microservices—covering setup with and without a Pact Broker, environment management, PactFlow’s “can‑i‑deploy” gates, and comparisons to Spring Cloud Contract and OpenAPI."><meta name="author" content="testforge"><link rel="sitemap" href="/sitemap-index.xml"><!-- Google AdSense --><script type="text/partytown" src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1449011647876445" crossorigin="anonymous"></script><!-- Google Analytics --><script type="text/partytown" src="https://www.googletagmanager.com/gtag/js?id=G-3PGWEVMFNM">
+    </script><script type="text/partytown">
+      const consentGiven = localStorage.getItem("cookieConsent");
+      if (consentGiven !== "false") {
+        window.dataLayer = window.dataLayer || [];
+        function gtag() {
+          dataLayer.push(arguments);
+        }
+        gtag("js", new Date());
+        gtag("config", "G-3PGWEVMFNM");
+      }
+    </script><!-- Open Graph / Facebook --><meta property="og:title" content="Contract Testing using Pact | testforge"><meta property="og:description" content="A concise guide to using Pact for consumer‑driven contract testing between TypeScript frontends and Java microservices—covering setup with and without a Pact Broker, environment management, PactFlow’s “can‑i‑deploy” gates, and comparisons to Spring Cloud Contract and OpenAPI."><meta property="og:url" content="https://testforge.blog/posts/004-pact-contract-testing/"><meta property="og:image" content="https://testforge.blog/assets/images/004-pact-contract-testing.png"><!-- Article Published/Modified time --><meta property="article:published_time" content="2025-04-18T10:44:00.000Z"><!-- Twitter --><meta property="twitter:card" content="summary_large_image"><meta property="twitter:url" content="https://testforge.blog/posts/004-pact-contract-testing/"><meta property="twitter:title" content="Contract Testing using Pact | testforge"><meta property="twitter:description" content="A concise guide to using Pact for consumer‑driven contract testing between TypeScript frontends and Java microservices—covering setup with and without a Pact Broker, environment management, PactFlow’s “can‑i‑deploy” gates, and comparisons to Spring Cloud Contract and OpenAPI."><meta property="twitter:image" content="https://testforge.blog/assets/images/004-pact-contract-testing.png"><!-- Google JSON-LD Structured data --><script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","headline":"Contract Testing using Pact | testforge","image":"https://testforge.blog/assets/images/004-pact-contract-testing.png","datePublished":"2025-04-18T10:44:00.000Z","author":[{"@type":"Person","name":"testforge","url":"https://github.com/testforgeio"}]}</script><!-- Google Font --><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&display=swap" rel="preload" as="style" onload="this.onload=null; this.rel='stylesheet';" crossorigin><meta name="theme-color" content=""><meta name="astro-view-transitions-enabled" content="true"><meta name="astro-view-transitions-fallback" content="animate"><script src="/toggle-theme.js" async></script><link rel="stylesheet" href="/_astro/index.Cf_sS0kF.css">
+<style>a:where(.astro-blwjyjpt){position:relative;text-decoration-line:underline;text-decoration-style:dashed}a:where(.astro-blwjyjpt):hover{top:-.125rem;--tw-text-opacity: 1;color:rgba(var(--color-accent),var(--tw-text-opacity, 1))}a:where(.astro-blwjyjpt):focus-visible{padding:.25rem}a:where(.astro-blwjyjpt) svg:where(.astro-blwjyjpt){margin-right:-1.25rem;height:1.5rem;width:1.5rem;--tw-scale-x: .95;--tw-scale-y: .95;transform:translate(var(--tw-translate-x),var(--tw-translate-y)) rotate(var(--tw-rotate)) skew(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));--tw-text-opacity: 1;color:rgba(var(--color-text-base),var(--tw-text-opacity, 1));opacity:.8}.group:where(.astro-blwjyjpt):hover a:where(.astro-blwjyjpt) svg:where(.astro-blwjyjpt){fill:rgb(var(--color-accent))}
+@keyframes astroFadeInOut{0%{opacity:1}to{opacity:0}}@keyframes astroFadeIn{0%{opacity:0;mix-blend-mode:plus-lighter}to{opacity:1;mix-blend-mode:plus-lighter}}@keyframes astroFadeOut{0%{opacity:1;mix-blend-mode:plus-lighter}to{opacity:0;mix-blend-mode:plus-lighter}}@keyframes astroSlideFromRight{0%{transform:translate(100%)}}@keyframes astroSlideFromLeft{0%{transform:translate(-100%)}}@keyframes astroSlideToRight{to{transform:translate(100%)}}@keyframes astroSlideToLeft{to{transform:translate(-100%)}}@media (prefers-reduced-motion){::view-transition-group(*),::view-transition-old(*),::view-transition-new(*){animation:none!important}[data-astro-transition-scope]{animation:none!important}}
+.social-icons:where(.astro-wkojbtzc){display:flex;flex-direction:column;flex-wrap:wrap;align-items:center;justify-content:center;gap:.25rem}@media (min-width: 640px){.social-icons:where(.astro-wkojbtzc){align-items:flex-start}}.link-button:where(.astro-wkojbtzc){--tw-scale-x: .9;--tw-scale-y: .9;transform:translate(var(--tw-translate-x),var(--tw-translate-y)) rotate(var(--tw-rotate)) skew(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));padding:.5rem}.link-button:where(.astro-wkojbtzc):hover{--tw-rotate: 6deg;transform:translate(var(--tw-translate-x),var(--tw-translate-y)) rotate(var(--tw-rotate)) skew(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}@media (min-width: 640px){.link-button:where(.astro-wkojbtzc){padding:.25rem}}main:where(.astro-vj4tpspi){margin-left:auto;margin-right:auto;width:100%;max-width:48rem;padding-left:1rem;padding-right:1rem;padding-bottom:3rem}.post-title:where(.astro-vj4tpspi){font-size:1.5rem;line-height:2rem;font-weight:600;--tw-text-opacity: 1;color:rgba(var(--color-accent),var(--tw-text-opacity, 1))}
+</style><script type="module" src="/_astro/hoisted.VFObjY0O.js"></script>
+<script>!(function(w,p,f,c){if(!window.crossOriginIsolated && !navigator.serviceWorker) return;c=w[p]=Object.assign(w[p]||{},{"lib":"/~partytown/","debug":false});c[f]=(c[f]||[])})(window,'partytown','forward');/* Partytown 0.11.0 - MIT QwikDev */
+const t={preserveBehavior:!1},e=e=>{if("string"==typeof e)return[e,t];const[n,r=t]=e;return[n,{...t,...r}]},n=Object.freeze((t=>{const e=new Set;let n=[];do{Object.getOwnPropertyNames(n).forEach((t=>{"function"==typeof n[t]&&e.add(t)}))}while((n=Object.getPrototypeOf(n))!==Object.prototype);return Array.from(e)})());!function(t,r,o,i,a,s,c,l,d,p,u=t,f){function h(){f||(f=1,"/"==(c=(s.lib||"/~partytown/")+(s.debug?"debug/":""))[0]&&(d=r.querySelectorAll('script[type="text/partytown"]'),i!=t?i.dispatchEvent(new CustomEvent("pt1",{detail:t})):(l=setTimeout(v,(null==s?void 0:s.fallbackTimeout)||1e4),r.addEventListener("pt0",w),a?y(1):o.serviceWorker?o.serviceWorker.register(c+(s.swPath||"partytown-sw.js"),{scope:c}).then((function(t){t.active?y():t.installing&&t.installing.addEventListener("statechange",(function(t){"activated"==t.target.state&&y()}))}),console.error):v())))}function y(e){p=r.createElement(e?"script":"iframe"),t._pttab=Date.now(),e||(p.style.display="block",p.style.width="0",p.style.height="0",p.style.border="0",p.style.visibility="hidden",p.setAttribute("aria-hidden",!0)),p.src=c+"partytown-"+(e?"atomics.js?v=0.11.0":"sandbox-sw.html?"+t._pttab),r.querySelector(s.sandboxParent||"body").appendChild(p)}function v(n,o){for(w(),i==t&&(s.forward||[]).map((function(n){const[r]=e(n);delete t[r.split(".")[0]]})),n=0;n<d.length;n++)(o=r.createElement("script")).innerHTML=d[n].innerHTML,o.nonce=s.nonce,r.head.appendChild(o);p&&p.parentNode.removeChild(p)}function w(){clearTimeout(l)}s=t.partytown||{},i==t&&(s.forward||[]).map((function(r){const[o,{preserveBehavior:i}]=e(r);u=t,o.split(".").map((function(e,r,o){var a;u=u[o[r]]=r+1<o.length?u[o[r]]||(a=o[r+1],n.includes(a)?[]:{}):(()=>{let e=null;if(i){const{methodOrProperty:n,thisObject:r}=((t,e)=>{let n=t;for(let t=0;t<e.length-1;t+=1)n=n[e[t]];return{thisObject:n,methodOrProperty:e.length>0?n[e[e.length-1]]:void 0}})(t,o);"function"==typeof n&&(e=(...t)=>n.apply(r,...t))}return function(){let n;return e&&(n=e(arguments)),(t._ptf=t._ptf||[]).push(o,arguments),n}})()}))})),"complete"==r.readyState?h():(t.addEventListener("DOMContentLoaded",h),t.addEventListener("load",h))}(window,document,navigator,top,window.crossOriginIsolated);;(e=>{e.addEventListener("astro:before-swap",e=>{let r=document.body.querySelector("iframe[src*='/~partytown/']");if(r)e.newDocument.body.append(r)})})(document);</script><style>[data-astro-transition-scope="astro-plk3gbjq-1"] { view-transition-name: contract-testing-using-pact; }@layer astro { ::view-transition-old(contract-testing-using-pact) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }::view-transition-new(contract-testing-using-pact) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }[data-astro-transition=back]::view-transition-old(contract-testing-using-pact) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition=back]::view-transition-new(contract-testing-using-pact) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; } }[data-astro-transition-fallback="old"] [data-astro-transition-scope="astro-plk3gbjq-1"],
+			[data-astro-transition-fallback="old"][data-astro-transition-scope="astro-plk3gbjq-1"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition-fallback="new"] [data-astro-transition-scope="astro-plk3gbjq-1"],
+			[data-astro-transition-fallback="new"][data-astro-transition-scope="astro-plk3gbjq-1"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }[data-astro-transition=back][data-astro-transition-fallback="old"] [data-astro-transition-scope="astro-plk3gbjq-1"],
+			[data-astro-transition=back][data-astro-transition-fallback="old"][data-astro-transition-scope="astro-plk3gbjq-1"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition=back][data-astro-transition-fallback="new"] [data-astro-transition-scope="astro-plk3gbjq-1"],
+			[data-astro-transition=back][data-astro-transition-fallback="new"][data-astro-transition-scope="astro-plk3gbjq-1"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }</style><style>[data-astro-transition-scope="astro-36ssibgs-2"] { view-transition-name: pact; }@layer astro { ::view-transition-old(pact) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }::view-transition-new(pact) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }[data-astro-transition=back]::view-transition-old(pact) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition=back]::view-transition-new(pact) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; } }[data-astro-transition-fallback="old"] [data-astro-transition-scope="astro-36ssibgs-2"],
+			[data-astro-transition-fallback="old"][data-astro-transition-scope="astro-36ssibgs-2"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition-fallback="new"] [data-astro-transition-scope="astro-36ssibgs-2"],
+			[data-astro-transition-fallback="new"][data-astro-transition-scope="astro-36ssibgs-2"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }[data-astro-transition=back][data-astro-transition-fallback="old"] [data-astro-transition-scope="astro-36ssibgs-2"],
+			[data-astro-transition=back][data-astro-transition-fallback="old"][data-astro-transition-scope="astro-36ssibgs-2"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition=back][data-astro-transition-fallback="new"] [data-astro-transition-scope="astro-36ssibgs-2"],
+			[data-astro-transition=back][data-astro-transition-fallback="new"][data-astro-transition-scope="astro-36ssibgs-2"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }</style><style>[data-astro-transition-scope="astro-36ssibgs-3"] { view-transition-name: contract; }@layer astro { ::view-transition-old(contract) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }::view-transition-new(contract) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }[data-astro-transition=back]::view-transition-old(contract) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition=back]::view-transition-new(contract) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; } }[data-astro-transition-fallback="old"] [data-astro-transition-scope="astro-36ssibgs-3"],
+			[data-astro-transition-fallback="old"][data-astro-transition-scope="astro-36ssibgs-3"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition-fallback="new"] [data-astro-transition-scope="astro-36ssibgs-3"],
+			[data-astro-transition-fallback="new"][data-astro-transition-scope="astro-36ssibgs-3"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }[data-astro-transition=back][data-astro-transition-fallback="old"] [data-astro-transition-scope="astro-36ssibgs-3"],
+			[data-astro-transition=back][data-astro-transition-fallback="old"][data-astro-transition-scope="astro-36ssibgs-3"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition=back][data-astro-transition-fallback="new"] [data-astro-transition-scope="astro-36ssibgs-3"],
+			[data-astro-transition=back][data-astro-transition-fallback="new"][data-astro-transition-scope="astro-36ssibgs-3"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }</style></head> <body>  <header class="astro-3ef6ksr2"> <a id="skip-to-content" href="#main-content" class="astro-3ef6ksr2">Skip to content</a> <div class="nav-container astro-3ef6ksr2"> <div class="top-nav-wrap astro-3ef6ksr2"> <img class="mr-2 logo astro-3ef6ksr2" src="/assets/logo.png" alt="testforge" width="46" height="46"> <a href="/" class="logo whitespace-nowrap astro-3ef6ksr2"> testforge </a> <nav id="nav-menu" class="astro-3ef6ksr2"> <button class="hamburger-menu focus-outline astro-3ef6ksr2" aria-label="Open Menu" aria-expanded="false" aria-controls="menu-items"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="menu-icon astro-3ef6ksr2"> <line x1="7" y1="12" x2="21" y2="12" class="line astro-3ef6ksr2"></line> <line x1="3" y1="6" x2="21" y2="6" class="line astro-3ef6ksr2"></line> <line x1="12" y1="18" x2="21" y2="18" class="line astro-3ef6ksr2"></line> <line x1="18" y1="6" x2="6" y2="18" class="close astro-3ef6ksr2"></line> <line x1="6" y1="6" x2="18" y2="18" class="close astro-3ef6ksr2"></line> </svg> </button> <ul id="menu-items" class="display-none sm:flex astro-3ef6ksr2"> <li class="astro-3ef6ksr2"> <a href="/" class=" astro-3ef6ksr2"> Home </a> </li> <li class="astro-3ef6ksr2"> <a href="/posts/" class=" astro-3ef6ksr2">
+Posts
+</a> </li> <li class="astro-3ef6ksr2"> <a href="/tags/" class=" astro-3ef6ksr2">
+Tags
+</a> </li> <li class="astro-3ef6ksr2"> <a href="/search/" class="group inline-block hover:text-skin-accent focus-outline p-3 sm:p-1  flex astro-3ef6ksr2" aria-label="search" title="Search"> <svg xmlns="http://www.w3.org/2000/svg" class="scale-125 sm:scale-100 astro-3ef6ksr2"><path d="M19.023 16.977a35.13 35.13 0 0 1-1.367-1.384c-.372-.378-.596-.653-.596-.653l-2.8-1.337A6.962 6.962 0 0 0 16 9c0-3.859-3.14-7-7-7S2 5.141 2 9s3.14 7 7 7c1.763 0 3.37-.66 4.603-1.739l1.337 2.8s.275.224.653.596c.387.363.896.854 1.384 1.367l1.358 1.392.604.646 2.121-2.121-.646-.604c-.379-.372-.885-.866-1.391-1.36zM9 14c-2.757 0-5-2.243-5-5s2.243-5 5-5 5 2.243 5 5-2.243 5-5 5z" class="astro-3ef6ksr2"></path> </svg> <span class="sr-only astro-3ef6ksr2">Search</span> </a> </li> <li class="astro-3ef6ksr2"> <button id="theme-btn" class="focus-outline astro-3ef6ksr2" title="Toggles light & dark" aria-label="auto" aria-live="polite"> <svg xmlns="http://www.w3.org/2000/svg" id="moon-svg" class="astro-3ef6ksr2"> <path d="M20.742 13.045a8.088 8.088 0 0 1-2.077.271c-2.135 0-4.14-.83-5.646-2.336a8.025 8.025 0 0 1-2.064-7.723A1 1 0 0 0 9.73 2.034a10.014 10.014 0 0 0-4.489 2.582c-3.898 3.898-3.898 10.243 0 14.143a9.937 9.937 0 0 0 7.072 2.93 9.93 9.93 0 0 0 7.07-2.929 10.007 10.007 0 0 0 2.583-4.491 1.001 1.001 0 0 0-1.224-1.224zm-2.772 4.301a7.947 7.947 0 0 1-5.656 2.343 7.953 7.953 0 0 1-5.658-2.344c-3.118-3.119-3.118-8.195 0-11.314a7.923 7.923 0 0 1 2.06-1.483 10.027 10.027 0 0 0 2.89 7.848 9.972 9.972 0 0 0 7.848 2.891 8.036 8.036 0 0 1-1.484 2.059z" class="astro-3ef6ksr2"></path> </svg> <svg xmlns="http://www.w3.org/2000/svg" id="sun-svg" class="astro-3ef6ksr2"> <path d="M6.993 12c0 2.761 2.246 5.007 5.007 5.007s5.007-2.246 5.007-5.007S14.761 6.993 12 6.993 6.993 9.239 6.993 12zM12 8.993c1.658 0 3.007 1.349 3.007 3.007S13.658 15.007 12 15.007 8.993 13.658 8.993 12 10.342 8.993 12 8.993zM10.998 19h2v3h-2zm0-17h2v3h-2zm-9 9h3v2h-3zm17 0h3v2h-3zM4.219 18.363l2.12-2.122 1.415 1.414-2.12 2.122zM16.24 6.344l2.122-2.122 1.414 1.414-2.122 2.122zM6.342 7.759 4.22 5.637l1.415-1.414 2.12 2.122zm13.434 10.605-1.414 1.414-2.122-2.122 1.414-1.414z" class="astro-3ef6ksr2"></path> </svg> </button> </li> </ul> </nav> </div> </div> <div class="max-w-3xl mx-auto px-4"> <hr class="border-skin-line" aria-hidden="true"> </div> </header>   <div class="mx-auto flex w-full max-w-3xl justify-start px-2 astro-vj4tpspi"> <button class="focus-outline mb-2 mt-8 flex hover:opacity-75 astro-vj4tpspi" onclick="(() => (history.length === 1) ? window.location = '/' : history.back())()"> <svg xmlns="http://www.w3.org/2000/svg" class="astro-vj4tpspi"><path d="M13.293 6.293 7.586 12l5.707 5.707 1.414-1.414L10.414 12l4.293-4.293z" class="astro-vj4tpspi"></path> </svg><span class="astro-vj4tpspi">Go back</span> </button> </div> <main id="main-content" class="astro-vj4tpspi"> <h1 class="post-title inline-block astro-vj4tpspi" data-astro-transition-scope="astro-plk3gbjq-1">Contract Testing using Pact</h1> <div class="flex items-center space-x-2 opacity-80 my-2 astro-vj4tpspi"><svg xmlns="http://www.w3.org/2000/svg" class="scale-100 inline-block h-6 w-6 min-w-[1.375rem] fill-skin-base" aria-hidden="true"><path d="M7 11h2v2H7zm0 4h2v2H7zm4-4h2v2h-2zm0 4h2v2h-2zm4-4h2v2h-2zm0 4h2v2h-2z"></path><path d="M5 22h14c1.103 0 2-.897 2-2V6c0-1.103-.897-2-2-2h-2V2h-2v2H9V2H7v2H5c-1.103 0-2 .897-2 2v14c0 1.103.897 2 2 2zM19 8l.001 12H5V8h14z"></path></svg><span class="sr-only">Published:</span><span class="italic text-base"><time dateTime="2025-04-18T10:44:00.000Z">Apr 18, 2025</time><span aria-hidden="true"> | </span><span class="sr-only"> at </span><span class="text-nowrap">10:44 AM</span><span aria-hidden="true"> | </span><a class="space-x-1.5 hover:opacity-75" href="https://github.com/testforgeio/testforge/edit/main/blog/src/content/blog" rel="noopener noreferrer" target="_blank"><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icons-tabler-outline icon-tabler-edit inline-block scale-90! fill-skin-base" aria-hidden="true"><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><path d="M7 7h-1a2 2 0 0 0 -2 2v9a2 2 0 0 0 2 2h9a2 2 0 0 0 2 -2v-1"></path><path d="M20.385 6.585a2.1 2.1 0 0 0 -2.97 -2.97l-8.415 8.385v3h3l8.385 -8.415z"></path><path d="M16 5l3 3"></path></svg><span class="text-base italic">Suggest Changes</span></a></span></div> <article id="article" class="prose mx-auto mt-8 max-w-3xl astro-vj4tpspi"> <p><img  src="/_astro/004-pact-contract-testing.B_7OryEF_16BaVV.webp" alt="004-pact-contract-testing" width="1200" height="630" loading="lazy" decoding="async"></p>
+<h2 id="table-of-contents">Table of contents</h2>
+<p></p><details><summary>Open Table of contents</summary><p></p>
+<ul>
+<li><a href="#introduction">Introduction</a></li>
+<li><a href="#the-pain-points-why-traditional-integration-testing-struggles-with-microservices">The Pain Points: Why Traditional Integration Testing Struggles with Microservices</a></li>
+<li><a href="#what-is-contract-testing">What is Contract Testing?</a></li>
+<li><a href="#implementing-contract-testing-with-pact">Implementing Contract Testing with Pact</a>
+<ul>
+<li><a href="#step-1-consumer-side-contract-definition-typescript">Step 1: Consumer-Side Contract Definition (TypeScript)</a></li>
+<li><a href="#step-2-provider-side-contract-verification-java">Step 2: Provider-Side Contract Verification (Java)</a></li>
+</ul>
+</li>
+<li><a href="#scaling-up-using-the-pact-broker-for-collaboration">Scaling Up: Using the Pact Broker for Collaboration</a></li>
+<li><a href="#managing-contracts-across-environments-dev-staging-prod">Managing Contracts Across Environments (Dev, Staging, Prod)</a></li>
+<li><a href="#safe-releases-with-can-i-deploy-and-pactflow">Safe Releases with “Can I Deploy” and PactFlow</a></li>
+<li><a href="#pact-vs-other-contract-testing-approaches">Pact vs. Other Contract Testing Approaches</a></li>
+<li><a href="#conclusion-build-resilient-systems-with-confidence">Conclusion: Build Resilient Systems with Confidence</a></li>
+</ul>
+<p></p></details><p></p>
+<h2 id="introduction">Introduction</h2>
+<p>Modern software architecture often relies on a distributed system of microservices and frontend applications communicating via APIs. While this offers flexibility and scalability, ensuring seamless integration between these independent components presents significant challenges. Traditional end-to-end integration tests become slow, brittle, and difficult to manage as the system grows.</p>
+<p><strong>How can teams confidently deploy services independently without breaking consumers? How can we get fast feedback on API compatibility <em>before</em> deploying to complex environments?</strong></p>
+<p><strong>Contract testing</strong> provides a powerful solution by shifting integration checks earlier in the development lifecycle. Instead of testing entire deployed systems, contract testing verifies that each service (consumer or provider) adheres to a shared understanding – an <strong>API contract</strong> – defined by concrete interaction examples.</p>
+<p><strong>Pact</strong> is a leading open-source framework for <strong>consumer-driven contract testing (CDC)</strong>. It helps teams define, share, and verify these contracts, enabling independent deployments with confidence.</p>
+<p>This article will guide you through:</p>
+<ul>
+<li>The pitfalls of traditional integration testing in microservices.</li>
+<li>The core concepts of consumer-driven contract testing with Pact.</li>
+<li>Implementing Pact tests step-by-step (TypeScript consumer, Java provider) <strong>without</strong> a Pact Broker.</li>
+<li>Leveraging the <strong>Pact Broker</strong> for scalable contract management and collaboration.</li>
+<li>Managing contracts across different deployment environments (dev, staging, prod).</li>
+<li>Ensuring safe releases using <strong>PactFlow</strong> and the <code>can-i-deploy</code> tool.</li>
+<li>Comparing Pact with other contract testing approaches (Spring Cloud Contract, OpenAPI).</li>
+</ul>
+<p>Let’s dive in!</p>
+<h2 id="the-pain-points-why-traditional-integration-testing-struggles-with-microservices">The Pain Points: Why Traditional Integration Testing Struggles with Microservices</h2>
+<p>When building systems with many interacting services, relying solely on traditional integration tests often leads to significant hurdles:</p>
+<ol>
+<li><strong>Complex and Brittle Test Environments:</strong> Setting up and maintaining environments that replicate production, including all necessary service dependencies, is resource-intensive, costly, and prone to configuration drift. Tests become <strong>brittle</strong> because a failure in any single component or network glitch can cause the entire test suite to fail, making debugging difficult. Running a full suite involving dozens of services simply doesn’t scale.</li>
+<li><strong>Slow Feedback Loops:</strong> End-to-end tests are inherently slow to execute. Waiting minutes (or hours!) for feedback drastically slows down development cycles and discourages frequent testing. Diagnosing failures is also time-consuming as the root cause could lie in any of the interacting services.</li>
+<li><strong>Tight Coupling and Deployment Bottlenecks:</strong> Over-reliance on integration tests can inadvertently lead to <strong>lock-step releases</strong>. Teams become hesitant to deploy a service independently, fearing it might break untested interactions with other services. Testing compatibility across all possible version combinations of dependent services is practically impossible.</li>
+<li><strong>Poor Failure Isolation:</strong> When an integration test fails, it often indicates <em>that</em> something broke, but not necessarily <em>who</em> is at fault (the consumer expecting a change or the provider making one?). Pinpointing the source requires manual investigation across service boundaries.</li>
+</ol>
+<p>In essence, traditional integration tests in distributed systems tend to be <strong>fragile, expensive, slow, and hinder independent deployability</strong>. We need a more targeted approach.</p>
+<h2 id="what-is-contract-testing">What is Contract Testing?</h2>
+<p><strong>Contract testing</strong> verifies the interactions between API consumers and providers against a shared agreement, the <strong>contract</strong>. Instead of deploying both services, contract tests work in isolation:</p>
+<ul>
+<li><strong>Consumer Side:</strong> Tests assert that the consumer code can correctly generate requests and handle the expected responses defined in the contract.</li>
+<li><strong>Provider Side:</strong> Tests verify that the provider can actually produce the responses expected by the consumer for given requests, as defined in the contract.</li>
+</ul>
+<p>The contract itself isn’t just a static schema (like OpenAPI); it consists of <strong>concrete examples of interactions</strong> (request/response pairs). This ensures alignment on specific data formats, status codes, and headers for real-world scenarios.</p>
+<p><strong>Consumer-Driven Contracts (CDC):</strong> Pact champions the CDC approach. Here, the <strong>consumer</strong> dictates its expectations by defining the interactions it needs from the provider. This makes sense – the consumer knows precisely what data and format it requires to function. The provider’s responsibility is then to prove it can fulfill these documented expectations.</p>
+<p><strong>Why is this powerful?</strong></p>
+<ul>
+<li><strong>Early Detection of Breaking Changes:</strong> If a provider modifies its API in a way that violates a consumer’s documented needs (e.g., renaming a field, changing a data type), the provider’s contract verification test fails <em>in the provider’s own CI pipeline</em>, long before deployment.</li>
+<li><strong>Fast, Isolated Feedback:</strong> Contract tests typically run as part of each service’s unit/integration test suite, executing in seconds or minutes. They don’t require external dependencies or complex environments. Failures point directly to the specific interaction and service responsible.</li>
+<li><strong>Enables Independent Deployments:</strong> Confidence in API compatibility allows teams to develop and deploy services at their own pace, knowing they haven’t broken existing integrations defined in the contracts.</li>
+<li><strong>Living Documentation:</strong> The generated contract files (usually JSON) serve as reliable, up-to-date documentation of API interactions, reflecting actual usage patterns.</li>
+</ul>
+<p>Contract tests don’t replace <em>all</em> other forms of testing, but they significantly <strong>reduce the need for extensive end-to-end integration suites</strong>, allowing those to focus on verifying critical business flows rather than basic API compatibility.</p>
+<h2 id="implementing-contract-testing-with-pact">Implementing Contract Testing with Pact</h2>
+<p>Let’s walk through setting up Pact for a simple scenario: a TypeScript frontend (consumer) interacting with a Java backend (provider). We’ll start <strong>without</strong> using a Pact Broker, meaning the contract file generated by the consumer will be shared manually (e.g., checked into the provider’s repository or shared via artifacts).</p>
+<p>Our example: A <code>petstore-frontend</code> (consumer) needs to fetch pet details from <code>petstore-backend</code> (provider) via a <code>GET /pets/{id}</code> endpoint.</p>
+<p>The Pact workflow involves two key steps:</p>
+<ol>
+<li><strong>Consumer Test:</strong> Define interactions, run consumer code against a Pact mock server, generate the contract file.</li>
+<li><strong>Provider Verification:</strong> Load the contract file, replay interactions against the real provider, verify responses match the contract.</li>
+</ol>
+<h3 id="step-1-consumer-side-contract-definition-typescript">Step 1: Consumer-Side Contract Definition (TypeScript)</h3>
+<p>On the consumer side (e.g., a React/Vue/Angular app or a Node.js service), we use <code>@pact-foundation/pact</code>.</p>
+<ol>
+<li>
+<p><strong>Install Dependencies:</strong></p>
+<pre class="astro-code astro-code-themes min-light night-owl" style="background-color:#ffffff;--shiki-dark-bg:#011627;color:#24292eff;--shiki-dark:#d6deeb; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#6F42C1;font-style:inherit;--shiki-dark:#82AAFF;--shiki-dark-font-style:italic">npm</span><span style="color:#2B5581;--shiki-dark:#ECC48D"> install</span><span style="color:#2B5581;--shiki-dark:#82AAFF"> --save-dev</span><span style="color:#2B5581;--shiki-dark:#ECC48D"> @pact-foundation/pact</span><span style="color:#2B5581;--shiki-dark:#ECC48D"> jest</span><span style="color:#2B5581;--shiki-dark:#ECC48D"> ts-jest</span><span style="color:#2B5581;--shiki-dark:#ECC48D"> @types/jest</span></span>
+<span class="line"><span style="color:#C2C3C5;font-style:inherit;--shiki-dark:#637777;--shiki-dark-font-style:italic"># or using yarn:</span></span>
+<span class="line"><span style="color:#C2C3C5;font-style:inherit;--shiki-dark:#637777;--shiki-dark-font-style:italic"># yarn add --dev @pact-foundation/pact jest ts-jest @types/jest</span></span>
+<span class="line"></span></code></pre>
+</li>
+<li>
+<p><strong>Write the Contract Test (<code>petApi.consumer.spec.ts</code>):</strong>
+Assume you have an API client class <code>PetClient</code> that fetches pet data.</p>
+<pre class="astro-code astro-code-themes min-light night-owl" style="background-color:#ffffff;--shiki-dark-bg:#011627;color:#24292eff;--shiki-dark:#d6deeb; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0" data-language="typescript"><code><span class="line"><span style="color:#D32F2F;font-style:inherit;--shiki-dark:#C792EA;--shiki-dark-font-style:italic">import</span><span style="color:#24292EFF;--shiki-dark:#D6DEEB"> { Pact } </span><span style="color:#D32F2F;font-style:inherit;--shiki-dark:#C792EA;--shiki-dark-font-style:italic">from</span><span style="color:#22863A;--shiki-dark:#D9F5DD"> '</span><span style="color:#22863A;--shiki-dark:#ECC48D">@pact-foundation/pact</span><span style="color:#22863A;--shiki-dark:#D9F5DD">'</span><span style="color:#24292EFF;--shiki-dark:#D6DEEB">;</span></span>
+<span class="line"><span style="color:#D32F2F;font-style:inherit;--shiki-dark:#C792EA;--shiki-dark-font-style:italic">import</span><span style="color:#24292EFF;--shiki-dark:#D6DEEB"> path </span><span style="color:#D32F2F;font-style:inherit;--shiki-dark:#C792EA;--shiki-dark-font-style:italic">from</span><span style="color:#22863A;--shiki-dark:#D9F5DD"> '</span><span style="color:#22863A;--shiki-dark:#ECC48D">path</span><span style="color:#22863A;--shiki-dark:#D9F5DD">'</span><span style="color:#24292EFF;--shiki-dark:#D6DEEB">;</span></span>
+<span class="line"><span style="color:#D32F2F;font-style:inherit;--shiki-dark:#C792EA;--shiki-dark-font-style:italic">import</span><span style="color:#24292EFF;--shiki-dark:#D6DEEB"> { PetClient } </span><span style="color:#D32F2F;font-style:inherit;--shiki-dark:#C792EA;--shiki-dark-font-style:italic">from</span><span style="color:#22863A;--shiki-dark:#D9F5DD"> '</span><span style="color:#22863A;--shiki-dark:#ECC48D">./petClient</span><span style="color:#22863A;--shiki-dark:#D9F5DD">'</span><span style="color:#24292EFF;--shiki-dark:#D6DEEB">; </span><span style="color:#C2C3C5;font-style:inherit;--shiki-dark:#637777;--shiki-dark-font-style:italic">// Your API client implementation</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#C2C3C5;font-style:inherit;--shiki-dark:#637777;--shiki-dark-font-style:italic">// Configure the Pact mock provider</span></span>
+<span class="line"><span style="color:#D32F2F;--shiki-dark:#C792EA">const</span><span style="color:#1976D2;font-style:inherit;--shiki-dark:#82AAFF;--shiki-dark-font-style:italic"> provider</span><span style="color:#D32F2F;--shiki-dark:#C792EA"> =</span><span style="color:#D32F2F;--shiki-dark:#7FDBCA"> new</span><span style="color:#6F42C1;font-style:inherit;--shiki-dark:#82AAFF;--shiki-dark-font-style:italic"> Pact</span><span style="color:#24292EFF;--shiki-dark:#D6DEEB">(</span><span style="color:#24292EFF;--shiki-dark:#C792EA">{</span></span>
+<span class="line"><span style="color:#24292EFF;font-style:inherit;--shiki-dark:#C792EA;--shiki-dark-font-style:italic">  consumer</span><span style="color:#D32F2F;--shiki-dark:#C792EA">:</span><span style="color:#22863A;--shiki-dark:#D9F5DD"> '</span><span style="color:#22863A;--shiki-dark:#ECC48D">petstore-frontend</span><span style="color:#22863A;--shiki-dark:#D9F5DD">'</span><span style="color:#212121;--shiki-dark:#C792EA">,</span><span style="color:#C2C3C5;font-style:inherit;--shiki-dark:#637777;--shiki-dark-font-style:italic"> // Consumer name</span></span>
+<span class="line"><span style="color:#24292EFF;font-style:inherit;--shiki-dark:#C792EA;--shiki-dark-font-style:italic">  provider</span><span style="color:#D32F2F;--shiki-dark:#C792EA">:</span><span style="color:#22863A;--shiki-dark:#D9F5DD"> '</span><span style="color:#22863A;--shiki-dark:#ECC48D">petstore-backend</span><span style="color:#22863A;--shiki-dark:#D9F5DD">'</span><span style="color:#212121;--shiki-dark:#C792EA">,</span><span style="color:#C2C3C5;font-style:inherit;--shiki-dark:#637777;--shiki-dark-font-style:italic"> // Provider name (must match provider test)</span></span>
+<span class="line"><span style="color:#24292EFF;font-style:inherit;--shiki-dark:#C792EA;--shiki-dark-font-style:italic">  port</span><span style="color:#D32F2F;--shiki-dark:#C792EA">:</span><span style="color:#1976D2;--shiki-dark:#F78C6C"> 1234</span><span style="color:#212121;--shiki-dark:#C792EA">,</span><span style="color:#C2C3C5;font-style:inherit;--shiki-dark:#637777;--shiki-dark-font-style:italic">                  // Port for the mock server</span></span>
+<span class="line"><span style="color:#24292EFF;font-style:inherit;--shiki-dark:#C792EA;--shiki-dark-font-style:italic">  log</span><span style="color:#D32F2F;--shiki-dark:#C792EA">:</span><span style="color:#1976D2;font-style:inherit;--shiki-dark:#D6DEEB;--shiki-dark-font-style:italic"> path</span><span style="color:#6F42C1;font-style:inherit;--shiki-dark:#C792EA;--shiki-dark-font-style:italic">.</span><span style="color:#6F42C1;font-style:inherit;--shiki-dark:#82AAFF;--shiki-dark-font-style:italic">resolve</span><span style="color:#24292EFF;--shiki-dark:#D6DEEB">(</span><span style="color:#1976D2;font-style:inherit;--shiki-dark:#D6DEEB;--shiki-dark-font-style:italic">process</span><span style="color:#6F42C1;font-style:inherit;--shiki-dark:#C792EA;--shiki-dark-font-style:italic">.</span><span style="color:#6F42C1;font-style:inherit;--shiki-dark:#82AAFF;--shiki-dark-font-style:italic">cwd</span><span style="color:#24292EFF;--shiki-dark:#D6DEEB">()</span><span style="color:#212121;--shiki-dark:#C792EA">,</span><span style="color:#22863A;--shiki-dark:#D9F5DD"> '</span><span style="color:#22863A;--shiki-dark:#ECC48D">logs</span><span style="color:#22863A;--shiki-dark:#D9F5DD">'</span><span style="color:#212121;--shiki-dark:#C792EA">,</span><span style="color:#22863A;--shiki-dark:#D9F5DD"> '</span><span style="color:#22863A;--shiki-dark:#ECC48D">pact.log</span><span style="color:#22863A;--shiki-dark:#D9F5DD">'</span><span style="color:#24292EFF;--shiki-dark:#D6DEEB">)</span><span style="color:#212121;--shiki-dark:#C792EA">,</span><span style="color:#C2C3C5;font-style:inherit;--shiki-dark:#637777;--shiki-dark-font-style:italic"> // Log file</span></span>
+<span class="line"><span style="color:#24292EFF;font-style:inherit;--shiki-dark:#C792EA;--shiki-dark-font-style:italic">  dir</span><span style="color:#D32F2F;--shiki-dark:#C792EA">:</span><span style="color:#1976D2;font-style:inherit;--shiki-dark:#D6DEEB;--shiki-dark-font-style:italic"> path</span><span style="color:#6F42C1;font-style:inherit;--shiki-dark:#C792EA;--shiki-dark-font-style:italic">.</span><span style="color:#6F42C1;font-style:inherit;--shiki-dark:#82AAFF;--shiki-dark-font-style:italic">resolve</span><span style="color:#24292EFF;--shiki-dark:#D6DEEB">(</span><span style="color:#1976D2;font-style:inherit;--shiki-dark:#D6DEEB;--shiki-dark-font-style:italic">process</span><span style="color:#6F42C1;font-style:inherit;--shiki-dark:#C792EA;--shiki-dark-font-style:italic">.</span><span style="color:#6F42C1;font-style:inherit;--shiki-dark:#82AAFF;--shiki-dark-font-style:italic">cwd</span><span style="color:#24292EFF;--shiki-dark:#D6DEEB">()</span><span style="color:#212121;--shiki-dark:#C792EA">,</span><span style="color:#22863A;--shiki-dark:#D9F5DD"> '</span><span style="color:#22863A;--shiki-dark:#ECC48D">pacts</span><span style="color:#22863A;--shiki-dark:#D9F5DD">'</span><span style="color:#24292EFF;--shiki-dark:#D6DEEB">)</span><span style="color:#212121;--shiki-dark:#C792EA">,</span><span style="color:#C2C3C5;font-style:inherit;--shiki-dark:#637777;--shiki-dark-font-style:italic"> // Output directory for pact files</span></span>
+<span class="line"><span style="color:#24292EFF;font-style:inherit;--shiki-dark:#C792EA;--shiki-dark-font-style:italic">  logLevel</span><span style="color:#D32F2F;--shiki-dark:#C792EA">:</span><span style="color:#22863A;--shiki-dark:#D9F5DD"> '</span><span style="color:#22863A;--shiki-dark:#ECC48D">warn</span><span style="color:#22863A;--shiki-dark:#D9F5DD">'</span><span style="color:#212121;--shiki-dark:#C792EA">,</span></span>
+<span class="line"><span style="color:#24292EFF;--shiki-dark:#C792EA">}</span><span style="color:#24292EFF;--shiki-dark:#D6DEEB">);</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6F42C1;font-style:inherit;--shiki-dark:#82AAFF;--shiki-dark-font-style:italic">describe</span><span style="color:#24292EFF;--shiki-dark:#D6DEEB">(</span><span style="color:#22863A;--shiki-dark:#D9F5DD">'</span><span style="color:#22863A;--shiki-dark:#ECC48D">Pet API Contract Test</span><span style="color:#22863A;--shiki-dark:#D9F5DD">'</span><span style="color:#212121;--shiki-dark:#D6DEEB">,</span><span style="color:#24292EFF;--shiki-dark:#D9F5DD"> ()</span><span style="color:#D32F2F;--shiki-dark:#C792EA"> =></span><span style="color:#24292EFF;--shiki-dark:#D6DEEB"> {</span></span>
+<span class="line"><span style="color:#C2C3C5;font-style:inherit;--shiki-dark:#637777;--shiki-dark-font-style:italic">  // 1. Start the Pact mock server before tests</span></span>
+<span class="line"><span style="color:#6F42C1;font-style:inherit;--shiki-dark:#82AAFF;--shiki-dark-font-style:italic">  beforeAll</span><span style="color:#24292EFF;--shiki-dark:#D6DEEB">(</span><span style="color:#24292EFF;--shiki-dark:#D9F5DD">()</span><span style="color:#D32F2F;--shiki-dark:#C792EA"> =></span><span style="color:#1976D2;--shiki-dark:#D6DEEB"> provider</span><span style="color:#6F42C1;font-style:inherit;--shiki-dark:#C792EA;--shiki-dark-font-style:italic">.</span><span style="color:#6F42C1;font-style:inherit;--shiki-dark:#82AAFF;--shiki-dark-font-style:italic">setup</span><span style="color:#24292EFF;--shiki-dark:#D6DEEB">());</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#C2C3C5;font-style:inherit;--shiki-dark:#637777;--shiki-dark-font-style:italic">  // 3. Verify interactions after each test (ensures all mock calls were made)</span></span>
+<span class="line"><span style="color:#6F42C1;font-style:inherit;--shiki-dark:#82AAFF;--shiki-dark-font-style:italic">  afterEach</span><span style="color:#24292EFF;--shiki-dark:#D6DEEB">(</span><span style="color:#24292EFF;--shiki-dark:#D9F5DD">()</span><span style="color:#D32F2F;--shiki-dark:#C792EA"> =></span><span style="color:#1976D2;--shiki-dark:#D6DEEB"> provider</span><span style="color:#6F42C1;font-style:inherit;--shiki-dark:#C792EA;--shiki-dark-font-style:italic">.</span><span style="color:#6F42C1;font-style:inherit;--shiki-dark:#82AAFF;--shiki-dark-font-style:italic">verify</span><span style="color:#24292EFF;--shiki-dark:#D6DEEB">());</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#C2C3C5;font-style:inherit;--shiki-dark:#637777;--shiki-dark-font-style:italic">  // 4. Finalize Pact and write the contract file after all tests</span></span>
+<span class="line"><span style="color:#6F42C1;font-style:inherit;--shiki-dark:#82AAFF;--shiki-dark-font-style:italic">  afterAll</span><span style="color:#24292EFF;--shiki-dark:#D6DEEB">(</span><span style="color:#24292EFF;--shiki-dark:#D9F5DD">()</span><span style="color:#D32F2F;--shiki-dark:#C792EA"> =></span><span style="color:#1976D2;--shiki-dark:#D6DEEB"> provider</span><span style="color:#6F42C1;font-style:inherit;--shiki-dark:#C792EA;--shiki-dark-font-style:italic">.</span><span style="color:#6F42C1;font-style:inherit;--shiki-dark:#82AAFF;--shiki-dark-font-style:italic">finalize</span><span style="color:#24292EFF;--shiki-dark:#D6DEEB">());</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6F42C1;font-style:inherit;--shiki-dark:#82AAFF;--shiki-dark-font-style:italic">  describe</span><span style="color:#24292EFF;--shiki-dark:#D6DEEB">(</span><span style="color:#22863A;--shiki-dark:#D9F5DD">'</span><span style="color:#22863A;--shiki-dark:#ECC48D">Fetching a pet</span><span style="color:#22863A;--shiki-dark:#D9F5DD">'</span><span style="color:#212121;--shiki-dark:#D6DEEB">,</span><span style="color:#24292EFF;--shiki-dark:#D9F5DD"> ()</span><span style="color:#D32F2F;--shiki-dark:#C792EA"> =></span><span style="color:#24292EFF;--shiki-dark:#D6DEEB"> {</span></span>
+<span class="line"><span style="color:#6F42C1;font-style:inherit;--shiki-dark:#82AAFF;--shiki-dark-font-style:italic">    it</span><span style="color:#24292EFF;--shiki-dark:#D6DEEB">(</span><span style="color:#22863A;--shiki-dark:#D9F5DD">'</span><span style="color:#22863A;--shiki-dark:#ECC48D">should return pet details when a pet exists</span><span style="color:#22863A;--shiki-dark:#D9F5DD">'</span><span style="color:#212121;--shiki-dark:#D6DEEB">,</span><span style="color:#D32F2F;font-style:inherit;--shiki-dark:#C792EA;--shiki-dark-font-style:italic"> async</span><span style="color:#24292EFF;--shiki-dark:#D9F5DD"> ()</span><span style="color:#D32F2F;--shiki-dark:#C792EA"> =></span><span style="color:#24292EFF;--shiki-dark:#D6DEEB"> {</span></span>
+<span class="line"><span style="color:#C2C3C5;font-style:inherit;--shiki-dark:#637777;--shiki-dark-font-style:italic">      // 2. Define the expected interaction (the contract)</span></span>
+<span class="line"><span style="color:#D32F2F;font-style:inherit;--shiki-dark:#C792EA;--shiki-dark-font-style:italic">      await</span><span style="color:#1976D2;--shiki-dark:#D6DEEB"> provider</span><span style="color:#6F42C1;font-style:inherit;--shiki-dark:#C792EA;--shiki-dark-font-style:italic">.</span><span style="color:#6F42C1;font-style:inherit;--shiki-dark:#82AAFF;--shiki-dark-font-style:italic">addInteraction</span><span style="color:#24292EFF;--shiki-dark:#D6DEEB">({</span></span>
+<span class="line"><span style="color:#C2C3C5;font-style:inherit;--shiki-dark:#637777;--shiki-dark-font-style:italic">        // A descriptive state the provider needs to be in</span></span>
+<span class="line"><span style="color:#24292EFF;--shiki-dark:#D6DEEB">        state</span><span style="color:#D32F2F;--shiki-dark:#D6DEEB">:</span><span style="color:#22863A;--shiki-dark:#D9F5DD"> '</span><span style="color:#22863A;--shiki-dark:#ECC48D">a pet with ID 123 exists</span><span style="color:#22863A;--shiki-dark:#D9F5DD">'</span><span style="color:#212121;--shiki-dark:#D6DEEB">,</span></span>
+<span class="line"><span style="color:#C2C3C5;font-style:inherit;--shiki-dark:#637777;--shiki-dark-font-style:italic">        // Description of the request</span></span>
+<span class="line"><span style="color:#24292EFF;--shiki-dark:#D6DEEB">        uponReceiving</span><span style="color:#D32F2F;--shiki-dark:#D6DEEB">:</span><span style="color:#22863A;--shiki-dark:#D9F5DD"> '</span><span style="color:#22863A;--shiki-dark:#ECC48D">a request to fetch pet details for ID 123</span><span style="color:#22863A;--shiki-dark:#D9F5DD">'</span><span style="color:#212121;--shiki-dark:#D6DEEB">,</span></span>
+<span class="line"><span style="color:#C2C3C5;font-style:inherit;--shiki-dark:#637777;--shiki-dark-font-style:italic">        // Define the expected request from the consumer</span></span>
+<span class="line"><span style="color:#24292EFF;--shiki-dark:#D6DEEB">        withRequest</span><span style="color:#D32F2F;--shiki-dark:#D6DEEB">:</span><span style="color:#24292EFF;--shiki-dark:#D6DEEB"> {</span></span>
+<span class="line"><span style="color:#24292EFF;--shiki-dark:#D6DEEB">          method</span><span style="color:#D32F2F;--shiki-dark:#D6DEEB">:</span><span style="color:#22863A;--shiki-dark:#D9F5DD"> '</span><span style="color:#22863A;--shiki-dark:#ECC48D">GET</span><span style="color:#22863A;--shiki-dark:#D9F5DD">'</span><span style="color:#212121;--shiki-dark:#D6DEEB">,</span></span>
+<span class="line"><span style="color:#24292EFF;--shiki-dark:#D6DEEB">          path</span><span style="color:#D32F2F;--shiki-dark:#D6DEEB">:</span><span style="color:#22863A;--shiki-dark:#D9F5DD"> '</span><span style="color:#22863A;--shiki-dark:#ECC48D">/pets/123</span><span style="color:#22863A;--shiki-dark:#D9F5DD">'</span><span style="color:#212121;--shiki-dark:#D6DEEB">,</span></span>
+<span class="line"><span style="color:#24292EFF;--shiki-dark:#D6DEEB">          headers</span><span style="color:#D32F2F;--shiki-dark:#D6DEEB">:</span><span style="color:#24292EFF;--shiki-dark:#D6DEEB"> { Accept</span><span style="color:#D32F2F;--shiki-dark:#D6DEEB">:</span><span style="color:#22863A;--shiki-dark:#D9F5DD"> '</span><span style="color:#22863A;--shiki-dark:#ECC48D">application/json</span><span style="color:#22863A;--shiki-dark:#D9F5DD">'</span><span style="color:#24292EFF;--shiki-dark:#D6DEEB"> }</span><span style="color:#212121;--shiki-dark:#D6DEEB">,</span></span>
+<span class="line"><span style="color:#24292EFF;--shiki-dark:#D6DEEB">        }</span><span style="color:#212121;--shiki-dark:#D6DEEB">,</span></span>
+<span class="line"><span style="color:#C2C3C5;font-style:inherit;--shiki-dark:#637777;--shiki-dark-font-style:italic">        // Define the expected response from the provider</span></span>
+<span class="line"><span style="color:#24292EFF;--shiki-dark:#D6DEEB">        willRespondWith</span><span style="color:#D32F2F;--shiki-dark:#D6DEEB">:</span><span style="color:#24292EFF;--shiki-dark:#D6DEEB"> {</span></span>
+<span class="line"><span style="color:#24292EFF;--shiki-dark:#D6DEEB">          status</span><span style="color:#D32F2F;--shiki-dark:#D6DEEB">:</span><span style="color:#1976D2;--shiki-dark:#F78C6C"> 200</span><span style="color:#212121;--shiki-dark:#D6DEEB">,</span></span>
+<span class="line"><span style="color:#24292EFF;--shiki-dark:#D6DEEB">          headers</span><span style="color:#D32F2F;--shiki-dark:#D6DEEB">:</span><span style="color:#24292EFF;--shiki-dark:#D6DEEB"> { </span><span style="color:#22863A;--shiki-dark:#D9F5DD">'</span><span style="color:#22863A;--shiki-dark:#ECC48D">Content-Type</span><span style="color:#22863A;--shiki-dark:#D9F5DD">'</span><span style="color:#D32F2F;--shiki-dark:#D6DEEB">:</span><span style="color:#22863A;--shiki-dark:#D9F5DD"> '</span><span style="color:#22863A;--shiki-dark:#ECC48D">application/json</span><span style="color:#22863A;--shiki-dark:#D9F5DD">'</span><span style="color:#24292EFF;--shiki-dark:#D6DEEB"> }</span><span style="color:#212121;--shiki-dark:#D6DEEB">,</span></span>
+<span class="line"><span style="color:#C2C3C5;font-style:inherit;--shiki-dark:#637777;--shiki-dark-font-style:italic">          // Body can use Pact Matchers for flexibility (e.g., Pact.eachLike, Pact.like)</span></span>
+<span class="line"><span style="color:#C2C3C5;font-style:inherit;--shiki-dark:#637777;--shiki-dark-font-style:italic">          // Here, we expect an exact structure for simplicity</span></span>
+<span class="line"><span style="color:#24292EFF;--shiki-dark:#D6DEEB">          body</span><span style="color:#D32F2F;--shiki-dark:#D6DEEB">:</span><span style="color:#24292EFF;--shiki-dark:#D6DEEB"> {</span></span>
+<span class="line"><span style="color:#24292EFF;--shiki-dark:#D6DEEB">            id</span><span style="color:#D32F2F;--shiki-dark:#D6DEEB">:</span><span style="color:#1976D2;--shiki-dark:#F78C6C"> 123</span><span style="color:#212121;--shiki-dark:#D6DEEB">,</span></span>
+<span class="line"><span style="color:#24292EFF;--shiki-dark:#D6DEEB">            name</span><span style="color:#D32F2F;--shiki-dark:#D6DEEB">:</span><span style="color:#22863A;--shiki-dark:#D9F5DD"> '</span><span style="color:#22863A;--shiki-dark:#ECC48D">Fido</span><span style="color:#22863A;--shiki-dark:#D9F5DD">'</span><span style="color:#212121;--shiki-dark:#D6DEEB">,</span></span>
+<span class="line"><span style="color:#24292EFF;--shiki-dark:#D6DEEB">            status</span><span style="color:#D32F2F;--shiki-dark:#D6DEEB">:</span><span style="color:#22863A;--shiki-dark:#D9F5DD"> '</span><span style="color:#22863A;--shiki-dark:#ECC48D">available</span><span style="color:#22863A;--shiki-dark:#D9F5DD">'</span><span style="color:#212121;--shiki-dark:#D6DEEB">,</span></span>
+<span class="line"><span style="color:#24292EFF;--shiki-dark:#D6DEEB">          }</span><span style="color:#212121;--shiki-dark:#D6DEEB">,</span></span>
+<span class="line"><span style="color:#24292EFF;--shiki-dark:#D6DEEB">        }</span><span style="color:#212121;--shiki-dark:#D6DEEB">,</span></span>
+<span class="line"><span style="color:#24292EFF;--shiki-dark:#D6DEEB">      });</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#C2C3C5;font-style:inherit;--shiki-dark:#637777;--shiki-dark-font-style:italic">      // Execute the actual consumer code that makes the API call</span></span>
+<span class="line"><span style="color:#C2C3C5;font-style:inherit;--shiki-dark:#637777;--shiki-dark-font-style:italic">      // The PetClient should be configured to hit the mock server URL</span></span>
+<span class="line"><span style="color:#D32F2F;--shiki-dark:#C792EA">      const</span><span style="color:#1976D2;font-style:inherit;--shiki-dark:#82AAFF;--shiki-dark-font-style:italic"> client</span><span style="color:#D32F2F;--shiki-dark:#C792EA"> =</span><span style="color:#D32F2F;--shiki-dark:#7FDBCA"> new</span><span style="color:#6F42C1;font-style:inherit;--shiki-dark:#82AAFF;--shiki-dark-font-style:italic"> PetClient</span><span style="color:#24292EFF;--shiki-dark:#D6DEEB">(</span><span style="color:#1976D2;font-style:inherit;--shiki-dark:#D6DEEB;--shiki-dark-font-style:italic">provider</span><span style="color:#24292EFF;font-style:inherit;--shiki-dark:#C792EA;--shiki-dark-font-style:italic">.</span><span style="color:#1976D2;font-style:inherit;--shiki-dark:#FAF39F;--shiki-dark-font-style:italic">mockService</span><span style="color:#24292EFF;font-style:inherit;--shiki-dark:#C792EA;--shiki-dark-font-style:italic">.</span><span style="color:#24292EFF;font-style:inherit;--shiki-dark:#BAEBE2;--shiki-dark-font-style:italic">baseUrl</span><span style="color:#24292EFF;--shiki-dark:#D6DEEB">);</span></span>
+<span class="line"><span style="color:#D32F2F;--shiki-dark:#C792EA">      const</span><span style="color:#1976D2;font-style:inherit;--shiki-dark:#82AAFF;--shiki-dark-font-style:italic"> pet</span><span style="color:#D32F2F;--shiki-dark:#C792EA"> =</span><span style="color:#D32F2F;font-style:inherit;--shiki-dark:#C792EA;--shiki-dark-font-style:italic"> await</span><span style="color:#1976D2;font-style:inherit;--shiki-dark:#D6DEEB;--shiki-dark-font-style:italic"> client</span><span style="color:#6F42C1;font-style:inherit;--shiki-dark:#C792EA;--shiki-dark-font-style:italic">.</span><span style="color:#6F42C1;font-style:inherit;--shiki-dark:#82AAFF;--shiki-dark-font-style:italic">getPet</span><span style="color:#24292EFF;--shiki-dark:#D6DEEB">(</span><span style="color:#1976D2;--shiki-dark:#F78C6C">123</span><span style="color:#24292EFF;--shiki-dark:#D6DEEB">);</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#C2C3C5;font-style:inherit;--shiki-dark:#637777;--shiki-dark-font-style:italic">      // Assert that the consumer code handled the response correctly</span></span>
+<span class="line"><span style="color:#6F42C1;font-style:inherit;--shiki-dark:#82AAFF;--shiki-dark-font-style:italic">      expect</span><span style="color:#24292EFF;--shiki-dark:#D6DEEB">(pet)</span><span style="color:#6F42C1;font-style:inherit;--shiki-dark:#C792EA;--shiki-dark-font-style:italic">.</span><span style="color:#6F42C1;font-style:inherit;--shiki-dark:#82AAFF;--shiki-dark-font-style:italic">toBeDefined</span><span style="color:#24292EFF;--shiki-dark:#D6DEEB">();</span></span>
+<span class="line"><span style="color:#6F42C1;font-style:inherit;--shiki-dark:#82AAFF;--shiki-dark-font-style:italic">      expect</span><span style="color:#24292EFF;--shiki-dark:#D6DEEB">(</span><span style="color:#1976D2;--shiki-dark:#D6DEEB">pet</span><span style="color:#24292EFF;font-style:inherit;--shiki-dark:#C792EA;--shiki-dark-font-style:italic">.</span><span style="color:#24292EFF;--shiki-dark:#BAEBE2">id</span><span style="color:#24292EFF;--shiki-dark:#D6DEEB">)</span><span style="color:#6F42C1;font-style:inherit;--shiki-dark:#C792EA;--shiki-dark-font-style:italic">.</span><span style="color:#6F42C1;font-style:inherit;--shiki-dark:#82AAFF;--shiki-dark-font-style:italic">toBe</span><span style="color:#24292EFF;--shiki-dark:#D6DEEB">(</span><span style="color:#1976D2;--shiki-dark:#F78C6C">123</span><span style="color:#24292EFF;--shiki-dark:#D6DEEB">);</span></span>
+<span class="line"><span style="color:#6F42C1;font-style:inherit;--shiki-dark:#82AAFF;--shiki-dark-font-style:italic">      expect</span><span style="color:#24292EFF;--shiki-dark:#D6DEEB">(</span><span style="color:#1976D2;--shiki-dark:#D6DEEB">pet</span><span style="color:#24292EFF;font-style:inherit;--shiki-dark:#C792EA;--shiki-dark-font-style:italic">.</span><span style="color:#24292EFF;--shiki-dark:#BAEBE2">name</span><span style="color:#24292EFF;--shiki-dark:#D6DEEB">)</span><span style="color:#6F42C1;font-style:inherit;--shiki-dark:#C792EA;--shiki-dark-font-style:italic">.</span><span style="color:#6F42C1;font-style:inherit;--shiki-dark:#82AAFF;--shiki-dark-font-style:italic">toBe</span><span style="color:#24292EFF;--shiki-dark:#D6DEEB">(</span><span style="color:#22863A;--shiki-dark:#D9F5DD">'</span><span style="color:#22863A;--shiki-dark:#ECC48D">Fido</span><span style="color:#22863A;--shiki-dark:#D9F5DD">'</span><span style="color:#24292EFF;--shiki-dark:#D6DEEB">);</span></span>
+<span class="line"><span style="color:#6F42C1;font-style:inherit;--shiki-dark:#82AAFF;--shiki-dark-font-style:italic">      expect</span><span style="color:#24292EFF;--shiki-dark:#D6DEEB">(</span><span style="color:#1976D2;--shiki-dark:#D6DEEB">pet</span><span style="color:#24292EFF;font-style:inherit;--shiki-dark:#C792EA;--shiki-dark-font-style:italic">.</span><span style="color:#24292EFF;--shiki-dark:#BAEBE2">status</span><span style="color:#24292EFF;--shiki-dark:#D6DEEB">)</span><span style="color:#6F42C1;font-style:inherit;--shiki-dark:#C792EA;--shiki-dark-font-style:italic">.</span><span style="color:#6F42C1;font-style:inherit;--shiki-dark:#82AAFF;--shiki-dark-font-style:italic">toBe</span><span style="color:#24292EFF;--shiki-dark:#D6DEEB">(</span><span style="color:#22863A;--shiki-dark:#D9F5DD">'</span><span style="color:#22863A;--shiki-dark:#ECC48D">available</span><span style="color:#22863A;--shiki-dark:#D9F5DD">'</span><span style="color:#24292EFF;--shiki-dark:#D6DEEB">);</span></span>
+<span class="line"><span style="color:#24292EFF;--shiki-dark:#D6DEEB">    });</span></span>
+<span class="line"><span style="color:#24292EFF;--shiki-dark:#D6DEEB">  });</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#C2C3C5;font-style:inherit;--shiki-dark:#637777;--shiki-dark-font-style:italic">  // Add more interactions for other endpoints (POST /pets, PUT /pets/123, etc.)</span></span>
+<span class="line"><span style="color:#24292EFF;--shiki-dark:#D6DEEB">});</span></span>
+<span class="line"></span></code></pre>
+</li>
+<li>
+<p><strong>Run the Consumer Test:</strong>
+Executing this test (e.g., via <code>jest</code>) will:</p>
+<ul>
+<li>Start a mock server on <code>http://localhost:1234</code>.</li>
+<li>Register the defined interaction (<code>GET /pets/123</code>).</li>
+<li>Run your <code>PetClient</code> code, which hits the mock server.</li>
+<li>Verify the request matched the expectation and the response was handled.</li>
+<li>Generate a contract file: <code>pacts/petstore-frontend-petstore-backend.json</code>. This JSON file <em>is</em> the contract.</li>
+</ul>
+<p><strong>Key Points:</strong></p>
+<ul>
+<li><code>state</code>: Describes a precondition on the provider (e.g., “data exists”). The provider test needs to handle this.</li>
+<li><code>uponReceiving</code>: Human-readable description of the request.</li>
+<li><code>withRequest</code>: Specifies the exact request the consumer will send (method, path, headers, body).</li>
+<li><code>willRespondWith</code>: Specifies the exact response the consumer expects (status, headers, body). Pact Matchers can be used here for more flexible matching (e.g., checking types instead of exact values).</li>
+<li><code>provider.verify()</code>: Ensures the consumer code actually made the expected API call during the test.</li>
+<li><code>provider.finalize()</code>: Writes the pact file.</li>
+</ul>
+</li>
+</ol>
+<h3 id="step-2-provider-side-contract-verification-java">Step 2: Provider-Side Contract Verification (Java)</h3>
+<p>Now, we take the generated <code>petstore-frontend-petstore-backend.json</code> file and use it to verify our Java Spring Boot backend (<code>petstore-backend</code>).</p>
+<ol>
+<li>
+<p><strong>Share the Contract:</strong> Manually copy the <code>.json</code> pact file into the provider project (e.g., into <code>src/test/resources/pacts</code>).</p>
+</li>
+<li>
+<p><strong>Add Pact JVM Dependencies (Maven <code>pom.xml</code>):</strong></p>
+<pre class="astro-code astro-code-themes min-light night-owl" style="background-color:#ffffff;--shiki-dark-bg:#011627;color:#24292eff;--shiki-dark:#d6deeb; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0" data-language="xml"><code><span class="line"><span style="color:#24292EFF;--shiki-dark:#7FDBCA">&#x3C;</span><span style="color:#22863A;--shiki-dark:#CAECE6">dependency</span><span style="color:#24292EFF;--shiki-dark:#7FDBCA">></span></span>
+<span class="line"><span style="color:#24292EFF;--shiki-dark:#7FDBCA">    &#x3C;</span><span style="color:#22863A;--shiki-dark:#CAECE6">groupId</span><span style="color:#24292EFF;--shiki-dark:#7FDBCA">></span><span style="color:#24292EFF;--shiki-dark:#D6DEEB">au.com.dius.pact.provider</span><span style="color:#24292EFF;--shiki-dark:#7FDBCA">&#x3C;/</span><span style="color:#22863A;--shiki-dark:#CAECE6">groupId</span><span style="color:#24292EFF;--shiki-dark:#7FDBCA">></span></span>
+<span class="line"><span style="color:#24292EFF;--shiki-dark:#7FDBCA">    &#x3C;</span><span style="color:#22863A;--shiki-dark:#CAECE6">artifactId</span><span style="color:#24292EFF;--shiki-dark:#7FDBCA">></span><span style="color:#24292EFF;--shiki-dark:#D6DEEB">junit5</span><span style="color:#24292EFF;--shiki-dark:#7FDBCA">&#x3C;/</span><span style="color:#22863A;--shiki-dark:#CAECE6">artifactId</span><span style="color:#24292EFF;--shiki-dark:#7FDBCA">></span></span>
+<span class="line"><span style="color:#24292EFF;--shiki-dark:#7FDBCA">    &#x3C;</span><span style="color:#22863A;--shiki-dark:#CAECE6">version</span><span style="color:#24292EFF;--shiki-dark:#7FDBCA">></span><span style="color:#24292EFF;--shiki-dark:#D6DEEB">4.6.7</span><span style="color:#24292EFF;--shiki-dark:#7FDBCA">&#x3C;/</span><span style="color:#22863A;--shiki-dark:#CAECE6">version</span><span style="color:#24292EFF;--shiki-dark:#7FDBCA">></span><span style="color:#C2C3C5;font-style:inherit;--shiki-dark:#637777;--shiki-dark-font-style:italic"> &#x3C;!-- Use latest Pact JVM version --></span></span>
+<span class="line"><span style="color:#24292EFF;--shiki-dark:#7FDBCA">    &#x3C;</span><span style="color:#22863A;--shiki-dark:#CAECE6">scope</span><span style="color:#24292EFF;--shiki-dark:#7FDBCA">></span><span style="color:#24292EFF;--shiki-dark:#D6DEEB">test</span><span style="color:#24292EFF;--shiki-dark:#7FDBCA">&#x3C;/</span><span style="color:#22863A;--shiki-dark:#CAECE6">scope</span><span style="color:#24292EFF;--shiki-dark:#7FDBCA">></span></span>
+<span class="line"><span style="color:#24292EFF;--shiki-dark:#7FDBCA">&#x3C;/</span><span style="color:#22863A;--shiki-dark:#CAECE6">dependency</span><span style="color:#24292EFF;--shiki-dark:#7FDBCA">></span></span>
+<span class="line"><span style="color:#24292EFF;--shiki-dark:#7FDBCA">&#x3C;</span><span style="color:#22863A;--shiki-dark:#CAECE6">dependency</span><span style="color:#24292EFF;--shiki-dark:#7FDBCA">></span><span style="color:#C2C3C5;font-style:inherit;--shiki-dark:#637777;--shiki-dark-font-style:italic"> &#x3C;!-- If using Spring Boot --></span></span>
+<span class="line"><span style="color:#24292EFF;--shiki-dark:#7FDBCA">    &#x3C;</span><span style="color:#22863A;--shiki-dark:#CAECE6">groupId</span><span style="color:#24292EFF;--shiki-dark:#7FDBCA">></span><span style="color:#24292EFF;--shiki-dark:#D6DEEB">au.com.dius.pact.provider</span><span style="color:#24292EFF;--shiki-dark:#7FDBCA">&#x3C;/</span><span style="color:#22863A;--shiki-dark:#CAECE6">groupId</span><span style="color:#24292EFF;--shiki-dark:#7FDBCA">></span></span>
+<span class="line"><span style="color:#24292EFF;--shiki-dark:#7FDBCA">    &#x3C;</span><span style="color:#22863A;--shiki-dark:#CAECE6">artifactId</span><span style="color:#24292EFF;--shiki-dark:#7FDBCA">></span><span style="color:#24292EFF;--shiki-dark:#D6DEEB">spring</span><span style="color:#24292EFF;--shiki-dark:#7FDBCA">&#x3C;/</span><span style="color:#22863A;--shiki-dark:#CAECE6">artifactId</span><span style="color:#24292EFF;--shiki-dark:#7FDBCA">></span></span>
+<span class="line"><span style="color:#24292EFF;--shiki-dark:#7FDBCA">    &#x3C;</span><span style="color:#22863A;--shiki-dark:#CAECE6">version</span><span style="color:#24292EFF;--shiki-dark:#7FDBCA">></span><span style="color:#24292EFF;--shiki-dark:#D6DEEB">4.6.7</span><span style="color:#24292EFF;--shiki-dark:#7FDBCA">&#x3C;/</span><span style="color:#22863A;--shiki-dark:#CAECE6">version</span><span style="color:#24292EFF;--shiki-dark:#7FDBCA">></span></span>
+<span class="line"><span style="color:#24292EFF;--shiki-dark:#7FDBCA">    &#x3C;</span><span style="color:#22863A;--shiki-dark:#CAECE6">scope</span><span style="color:#24292EFF;--shiki-dark:#7FDBCA">></span><span style="color:#24292EFF;--shiki-dark:#D6DEEB">test</span><span style="color:#24292EFF;--shiki-dark:#7FDBCA">&#x3C;/</span><span style="color:#22863A;--shiki-dark:#CAECE6">scope</span><span style="color:#24292EFF;--shiki-dark:#7FDBCA">></span></span>
+<span class="line"><span style="color:#24292EFF;--shiki-dark:#7FDBCA">&#x3C;/</span><span style="color:#22863A;--shiki-dark:#CAECE6">dependency</span><span style="color:#24292EFF;--shiki-dark:#7FDBCA">></span></span>
+<span class="line"><span style="color:#24292EFF;--shiki-dark:#7FDBCA">&#x3C;</span><span style="color:#22863A;--shiki-dark:#CAECE6">dependency</span><span style="color:#24292EFF;--shiki-dark:#7FDBCA">></span><span style="color:#C2C3C5;font-style:inherit;--shiki-dark:#637777;--shiki-dark-font-style:italic"> &#x3C;!-- Needed for JUnit 5 integration --></span></span>
+<span class="line"><span style="color:#24292EFF;--shiki-dark:#7FDBCA">    &#x3C;</span><span style="color:#22863A;--shiki-dark:#CAECE6">groupId</span><span style="color:#24292EFF;--shiki-dark:#7FDBCA">></span><span style="color:#24292EFF;--shiki-dark:#D6DEEB">org.junit.jupiter</span><span style="color:#24292EFF;--shiki-dark:#7FDBCA">&#x3C;/</span><span style="color:#22863A;--shiki-dark:#CAECE6">groupId</span><span style="color:#24292EFF;--shiki-dark:#7FDBCA">></span></span>
+<span class="line"><span style="color:#24292EFF;--shiki-dark:#7FDBCA">    &#x3C;</span><span style="color:#22863A;--shiki-dark:#CAECE6">artifactId</span><span style="color:#24292EFF;--shiki-dark:#7FDBCA">></span><span style="color:#24292EFF;--shiki-dark:#D6DEEB">junit-jupiter-engine</span><span style="color:#24292EFF;--shiki-dark:#7FDBCA">&#x3C;/</span><span style="color:#22863A;--shiki-dark:#CAECE6">artifactId</span><span style="color:#24292EFF;--shiki-dark:#7FDBCA">></span></span>
+<span class="line"><span style="color:#24292EFF;--shiki-dark:#7FDBCA">    &#x3C;</span><span style="color:#22863A;--shiki-dark:#CAECE6">version</span><span style="color:#24292EFF;--shiki-dark:#7FDBCA">></span><span style="color:#24292EFF;--shiki-dark:#D6DEEB">5.9.3</span><span style="color:#24292EFF;--shiki-dark:#7FDBCA">&#x3C;/</span><span style="color:#22863A;--shiki-dark:#CAECE6">version</span><span style="color:#24292EFF;--shiki-dark:#7FDBCA">></span><span style="color:#C2C3C5;font-style:inherit;--shiki-dark:#637777;--shiki-dark-font-style:italic"> &#x3C;!-- Use compatible JUnit 5 version --></span></span>
+<span class="line"><span style="color:#24292EFF;--shiki-dark:#7FDBCA">    &#x3C;</span><span style="color:#22863A;--shiki-dark:#CAECE6">scope</span><span style="color:#24292EFF;--shiki-dark:#7FDBCA">></span><span style="color:#24292EFF;--shiki-dark:#D6DEEB">test</span><span style="color:#24292EFF;--shiki-dark:#7FDBCA">&#x3C;/</span><span style="color:#22863A;--shiki-dark:#CAECE6">scope</span><span style="color:#24292EFF;--shiki-dark:#7FDBCA">></span></span>
+<span class="line"><span style="color:#24292EFF;--shiki-dark:#7FDBCA">&#x3C;/</span><span style="color:#22863A;--shiki-dark:#CAECE6">dependency</span><span style="color:#24292EFF;--shiki-dark:#7FDBCA">></span></span>
+<span class="line"><span style="color:#C2C3C5;font-style:inherit;--shiki-dark:#637777;--shiki-dark-font-style:italic">&#x3C;!-- Ensure you have spring-boot-starter-test for Spring Boot testing --></span></span>
+<span class="line"><span style="color:#24292EFF;--shiki-dark:#7FDBCA">&#x3C;</span><span style="color:#22863A;--shiki-dark:#CAECE6">dependency</span><span style="color:#24292EFF;--shiki-dark:#7FDBCA">></span></span>
+<span class="line"><span style="color:#24292EFF;--shiki-dark:#7FDBCA">    &#x3C;</span><span style="color:#22863A;--shiki-dark:#CAECE6">groupId</span><span style="color:#24292EFF;--shiki-dark:#7FDBCA">></span><span style="color:#24292EFF;--shiki-dark:#D6DEEB">org.springframework.boot</span><span style="color:#24292EFF;--shiki-dark:#7FDBCA">&#x3C;/</span><span style="color:#22863A;--shiki-dark:#CAECE6">groupId</span><span style="color:#24292EFF;--shiki-dark:#7FDBCA">></span></span>
+<span class="line"><span style="color:#24292EFF;--shiki-dark:#7FDBCA">    &#x3C;</span><span style="color:#22863A;--shiki-dark:#CAECE6">artifactId</span><span style="color:#24292EFF;--shiki-dark:#7FDBCA">></span><span style="color:#24292EFF;--shiki-dark:#D6DEEB">spring-boot-starter-test</span><span style="color:#24292EFF;--shiki-dark:#7FDBCA">&#x3C;/</span><span style="color:#22863A;--shiki-dark:#CAECE6">artifactId</span><span style="color:#24292EFF;--shiki-dark:#7FDBCA">></span></span>
+<span class="line"><span style="color:#24292EFF;--shiki-dark:#7FDBCA">    &#x3C;</span><span style="color:#22863A;--shiki-dark:#CAECE6">scope</span><span style="color:#24292EFF;--shiki-dark:#7FDBCA">></span><span style="color:#24292EFF;--shiki-dark:#D6DEEB">test</span><span style="color:#24292EFF;--shiki-dark:#7FDBCA">&#x3C;/</span><span style="color:#22863A;--shiki-dark:#CAECE6">scope</span><span style="color:#24292EFF;--shiki-dark:#7FDBCA">></span></span>
+<span class="line"><span style="color:#24292EFF;--shiki-dark:#7FDBCA">&#x3C;/</span><span style="color:#22863A;--shiki-dark:#CAECE6">dependency</span><span style="color:#24292EFF;--shiki-dark:#7FDBCA">></span></span>
+<span class="line"></span></code></pre>
+<p><em>(Check Maven Central for the absolute latest versions)</em></p>
+</li>
+<li>
+<p><strong>Write the Verification Test (<code>PetApiProviderTest.java</code>):</strong>
+This test uses Pact’s JUnit 5 support to load the contract and verify it against a running instance of the Spring Boot application.</p>
+<pre class="astro-code astro-code-themes min-light night-owl" style="background-color:#ffffff;--shiki-dark-bg:#011627;color:#24292eff;--shiki-dark:#d6deeb; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#D32F2F;--shiki-dark:#C792EA">package</span><span style="color:#D32F2F;font-style:inherit;--shiki-dark:#C792EA;--shiki-dark-font-style:italic"> com</span><span style="color:#212121;--shiki-dark:#C792EA">.</span><span style="color:#D32F2F;font-style:inherit;--shiki-dark:#C792EA;--shiki-dark-font-style:italic">example</span><span style="color:#212121;--shiki-dark:#C792EA">.</span><span style="color:#D32F2F;font-style:inherit;--shiki-dark:#C792EA;--shiki-dark-font-style:italic">petstore</span><span style="color:#212121;--shiki-dark:#C792EA">.</span><span style="color:#D32F2F;font-style:inherit;--shiki-dark:#C792EA;--shiki-dark-font-style:italic">provider</span><span style="color:#24292EFF;--shiki-dark:#D6DEEB">;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D32F2F;--shiki-dark:#C792EA">import</span><span style="color:#D32F2F;font-style:inherit;--shiki-dark:#C792EA;--shiki-dark-font-style:italic"> au</span><span style="color:#212121;--shiki-dark:#C792EA">.</span><span style="color:#D32F2F;font-style:inherit;--shiki-dark:#C792EA;--shiki-dark-font-style:italic">com</span><span style="color:#212121;--shiki-dark:#C792EA">.</span><span style="color:#D32F2F;font-style:inherit;--shiki-dark:#C792EA;--shiki-dark-font-style:italic">dius</span><span style="color:#212121;--shiki-dark:#C792EA">.</span><span style="color:#D32F2F;font-style:inherit;--shiki-dark:#C792EA;--shiki-dark-font-style:italic">pact</span><span style="color:#212121;--shiki-dark:#C792EA">.</span><span style="color:#D32F2F;font-style:inherit;--shiki-dark:#C792EA;--shiki-dark-font-style:italic">provider</span><span style="color:#212121;--shiki-dark:#C792EA">.</span><span style="color:#D32F2F;font-style:inherit;--shiki-dark:#C792EA;--shiki-dark-font-style:italic">junit5</span><span style="color:#212121;--shiki-dark:#C792EA">.</span><span style="color:#D32F2F;font-style:inherit;--shiki-dark:#C792EA;--shiki-dark-font-style:italic">HttpTestTarget</span><span style="color:#24292EFF;--shiki-dark:#D6DEEB">;</span></span>
+<span class="line"><span style="color:#D32F2F;--shiki-dark:#C792EA">import</span><span style="color:#D32F2F;font-style:inherit;--shiki-dark:#C792EA;--shiki-dark-font-style:italic"> au</span><span style="color:#212121;--shiki-dark:#C792EA">.</span><span style="color:#D32F2F;font-style:inherit;--shiki-dark:#C792EA;--shiki-dark-font-style:italic">com</span><span style="color:#212121;--shiki-dark:#C792EA">.</span><span style="color:#D32F2F;font-style:inherit;--shiki-dark:#C792EA;--shiki-dark-font-style:italic">dius</span><span style="color:#212121;--shiki-dark:#C792EA">.</span><span style="color:#D32F2F;font-style:inherit;--shiki-dark:#C792EA;--shiki-dark-font-style:italic">pact</span><span style="color:#212121;--shiki-dark:#C792EA">.</span><span style="color:#D32F2F;font-style:inherit;--shiki-dark:#C792EA;--shiki-dark-font-style:italic">provider</span><span style="color:#212121;--shiki-dark:#C792EA">.</span><span style="color:#D32F2F;font-style:inherit;--shiki-dark:#C792EA;--shiki-dark-font-style:italic">junit5</span><span style="color:#212121;--shiki-dark:#C792EA">.</span><span style="color:#D32F2F;font-style:inherit;--shiki-dark:#C792EA;--shiki-dark-font-style:italic">PactVerificationContext</span><span style="color:#24292EFF;--shiki-dark:#D6DEEB">;</span></span>
+<span class="line"><span style="color:#D32F2F;--shiki-dark:#C792EA">import</span><span style="color:#D32F2F;font-style:inherit;--shiki-dark:#C792EA;--shiki-dark-font-style:italic"> au</span><span style="color:#212121;--shiki-dark:#C792EA">.</span><span style="color:#D32F2F;font-style:inherit;--shiki-dark:#C792EA;--shiki-dark-font-style:italic">com</span><span style="color:#212121;--shiki-dark:#C792EA">.</span><span style="color:#D32F2F;font-style:inherit;--shiki-dark:#C792EA;--shiki-dark-font-style:italic">dius</span><span style="color:#212121;--shiki-dark:#C792EA">.</span><span style="color:#D32F2F;font-style:inherit;--shiki-dark:#C792EA;--shiki-dark-font-style:italic">pact</span><span style="color:#212121;--shiki-dark:#C792EA">.</span><span style="color:#D32F2F;font-style:inherit;--shiki-dark:#C792EA;--shiki-dark-font-style:italic">provider</span><span style="color:#212121;--shiki-dark:#C792EA">.</span><span style="color:#D32F2F;font-style:inherit;--shiki-dark:#C792EA;--shiki-dark-font-style:italic">junitsupport</span><span style="color:#212121;--shiki-dark:#C792EA">.</span><span style="color:#D32F2F;font-style:inherit;--shiki-dark:#C792EA;--shiki-dark-font-style:italic">Provider</span><span style="color:#24292EFF;--shiki-dark:#D6DEEB">;</span></span>
+<span class="line"><span style="color:#D32F2F;--shiki-dark:#C792EA">import</span><span style="color:#D32F2F;font-style:inherit;--shiki-dark:#C792EA;--shiki-dark-font-style:italic"> au</span><span style="color:#212121;--shiki-dark:#C792EA">.</span><span style="color:#D32F2F;font-style:inherit;--shiki-dark:#C792EA;--shiki-dark-font-style:italic">com</span><span style="color:#212121;--shiki-dark:#C792EA">.</span><span style="color:#D32F2F;font-style:inherit;--shiki-dark:#C792EA;--shiki-dark-font-style:italic">dius</span><span style="color:#212121;--shiki-dark:#C792EA">.</span><span style="color:#D32F2F;font-style:inherit;--shiki-dark:#C792EA;--shiki-dark-font-style:italic">pact</span><span style="color:#212121;--shiki-dark:#C792EA">.</span><span style="color:#D32F2F;font-style:inherit;--shiki-dark:#C792EA;--shiki-dark-font-style:italic">provider</span><span style="color:#212121;--shiki-dark:#C792EA">.</span><span style="color:#D32F2F;font-style:inherit;--shiki-dark:#C792EA;--shiki-dark-font-style:italic">junitsupport</span><span style="color:#212121;--shiki-dark:#C792EA">.</span><span style="color:#D32F2F;font-style:inherit;--shiki-dark:#C792EA;--shiki-dark-font-style:italic">State</span><span style="color:#24292EFF;--shiki-dark:#D6DEEB">;</span></span>
+<span class="line"><span style="color:#D32F2F;--shiki-dark:#C792EA">import</span><span style="color:#D32F2F;font-style:inherit;--shiki-dark:#C792EA;--shiki-dark-font-style:italic"> au</span><span style="color:#212121;--shiki-dark:#C792EA">.</span><span style="color:#D32F2F;font-style:inherit;--shiki-dark:#C792EA;--shiki-dark-font-style:italic">com</span><span style="color:#212121;--shiki-dark:#C792EA">.</span><span style="color:#D32F2F;font-style:inherit;--shiki-dark:#C792EA;--shiki-dark-font-style:italic">dius</span><span style="color:#212121;--shiki-dark:#C792EA">.</span><span style="color:#D32F2F;font-style:inherit;--shiki-dark:#C792EA;--shiki-dark-font-style:italic">pact</span><span style="color:#212121;--shiki-dark:#C792EA">.</span><span style="color:#D32F2F;font-style:inherit;--shiki-dark:#C792EA;--shiki-dark-font-style:italic">provider</span><span style="color:#212121;--shiki-dark:#C792EA">.</span><span style="color:#D32F2F;font-style:inherit;--shiki-dark:#C792EA;--shiki-dark-font-style:italic">junitsupport</span><span style="color:#212121;--shiki-dark:#C792EA">.</span><span style="color:#D32F2F;font-style:inherit;--shiki-dark:#C792EA;--shiki-dark-font-style:italic">loader</span><span style="color:#212121;--shiki-dark:#C792EA">.</span><span style="color:#D32F2F;font-style:inherit;--shiki-dark:#C792EA;--shiki-dark-font-style:italic">PactFolder</span><span style="color:#24292EFF;--shiki-dark:#D6DEEB">;</span></span>
+<span class="line"><span style="color:#D32F2F;--shiki-dark:#C792EA">import</span><span style="color:#D32F2F;font-style:inherit;--shiki-dark:#C792EA;--shiki-dark-font-style:italic"> au</span><span style="color:#212121;--shiki-dark:#C792EA">.</span><span style="color:#D32F2F;font-style:inherit;--shiki-dark:#C792EA;--shiki-dark-font-style:italic">com</span><span style="color:#212121;--shiki-dark:#C792EA">.</span><span style="color:#D32F2F;font-style:inherit;--shiki-dark:#C792EA;--shiki-dark-font-style:italic">dius</span><span style="color:#212121;--shiki-dark:#C792EA">.</span><span style="color:#D32F2F;font-style:inherit;--shiki-dark:#C792EA;--shiki-dark-font-style:italic">pact</span><span style="color:#212121;--shiki-dark:#C792EA">.</span><span style="color:#D32F2F;font-style:inherit;--shiki-dark:#C792EA;--shiki-dark-font-style:italic">provider</span><span style="color:#212121;--shiki-dark:#C792EA">.</span><span style="color:#D32F2F;font-style:inherit;--shiki-dark:#C792EA;--shiki-dark-font-style:italic">spring</span><span style="color:#212121;--shiki-dark:#C792EA">.</span><span style="color:#D32F2F;font-style:inherit;--shiki-dark:#C792EA;--shiki-dark-font-style:italic">junit5</span><span style="color:#212121;--shiki-dark:#C792EA">.</span><span style="color:#D32F2F;font-style:inherit;--shiki-dark:#C792EA;--shiki-dark-font-style:italic">PactVerificationSpringProvider</span><span style="color:#24292EFF;--shiki-dark:#D6DEEB">;</span></span>
+<span class="line"><span style="color:#D32F2F;--shiki-dark:#C792EA">import</span><span style="color:#D32F2F;font-style:inherit;--shiki-dark:#C792EA;--shiki-dark-font-style:italic"> org</span><span style="color:#212121;--shiki-dark:#C792EA">.</span><span style="color:#D32F2F;font-style:inherit;--shiki-dark:#C792EA;--shiki-dark-font-style:italic">junit</span><span style="color:#212121;--shiki-dark:#C792EA">.</span><span style="color:#D32F2F;font-style:inherit;--shiki-dark:#C792EA;--shiki-dark-font-style:italic">jupiter</span><span style="color:#212121;--shiki-dark:#C792EA">.</span><span style="color:#D32F2F;font-style:inherit;--shiki-dark:#C792EA;--shiki-dark-font-style:italic">api</span><span style="color:#212121;--shiki-dark:#C792EA">.</span><span style="color:#D32F2F;font-style:inherit;--shiki-dark:#C792EA;--shiki-dark-font-style:italic">BeforeEach</span><span style="color:#24292EFF;--shiki-dark:#D6DEEB">;</span></span>
+<span class="line"><span style="color:#D32F2F;--shiki-dark:#C792EA">import</span><span style="color:#D32F2F;font-style:inherit;--shiki-dark:#C792EA;--shiki-dark-font-style:italic"> org</span><span style="color:#212121;--shiki-dark:#C792EA">.</span><span style="color:#D32F2F;font-style:inherit;--shiki-dark:#C792EA;--shiki-dark-font-style:italic">junit</span><span style="color:#212121;--shiki-dark:#C792EA">.</span><span style="color:#D32F2F;font-style:inherit;--shiki-dark:#C792EA;--shiki-dark-font-style:italic">jupiter</span><span style="color:#212121;--shiki-dark:#C792EA">.</span><span style="color:#D32F2F;font-style:inherit;--shiki-dark:#C792EA;--shiki-dark-font-style:italic">api</span><span style="color:#212121;--shiki-dark:#C792EA">.</span><span style="color:#D32F2F;font-style:inherit;--shiki-dark:#C792EA;--shiki-dark-font-style:italic">TestTemplate</span><span style="color:#24292EFF;--shiki-dark:#D6DEEB">;</span></span>
+<span class="line"><span style="color:#D32F2F;--shiki-dark:#C792EA">import</span><span style="color:#D32F2F;font-style:inherit;--shiki-dark:#C792EA;--shiki-dark-font-style:italic"> org</span><span style="color:#212121;--shiki-dark:#C792EA">.</span><span style="color:#D32F2F;font-style:inherit;--shiki-dark:#C792EA;--shiki-dark-font-style:italic">junit</span><span style="color:#212121;--shiki-dark:#C792EA">.</span><span style="color:#D32F2F;font-style:inherit;--shiki-dark:#C792EA;--shiki-dark-font-style:italic">jupiter</span><span style="color:#212121;--shiki-dark:#C792EA">.</span><span style="color:#D32F2F;font-style:inherit;--shiki-dark:#C792EA;--shiki-dark-font-style:italic">api</span><span style="color:#212121;--shiki-dark:#C792EA">.</span><span style="color:#D32F2F;font-style:inherit;--shiki-dark:#C792EA;--shiki-dark-font-style:italic">extension</span><span style="color:#212121;--shiki-dark:#C792EA">.</span><span style="color:#D32F2F;font-style:inherit;--shiki-dark:#C792EA;--shiki-dark-font-style:italic">ExtendWith</span><span style="color:#24292EFF;--shiki-dark:#D6DEEB">;</span></span>
+<span class="line"><span style="color:#D32F2F;--shiki-dark:#C792EA">import</span><span style="color:#D32F2F;font-style:inherit;--shiki-dark:#C792EA;--shiki-dark-font-style:italic"> org</span><span style="color:#212121;--shiki-dark:#C792EA">.</span><span style="color:#D32F2F;font-style:inherit;--shiki-dark:#C792EA;--shiki-dark-font-style:italic">springframework</span><span style="color:#212121;--shiki-dark:#C792EA">.</span><span style="color:#D32F2F;font-style:inherit;--shiki-dark:#C792EA;--shiki-dark-font-style:italic">boot</span><span style="color:#212121;--shiki-dark:#C792EA">.</span><span style="color:#D32F2F;font-style:inherit;--shiki-dark:#C792EA;--shiki-dark-font-style:italic">test</span><span style="color:#212121;--shiki-dark:#C792EA">.</span><span style="color:#D32F2F;font-style:inherit;--shiki-dark:#C792EA;--shiki-dark-font-style:italic">context</span><span style="color:#212121;--shiki-dark:#C792EA">.</span><span style="color:#D32F2F;font-style:inherit;--shiki-dark:#C792EA;--shiki-dark-font-style:italic">SpringBootTest</span><span style="color:#24292EFF;--shiki-dark:#D6DEEB">;</span></span>
+<span class="line"><span style="color:#D32F2F;--shiki-dark:#C792EA">import</span><span style="color:#D32F2F;font-style:inherit;--shiki-dark:#C792EA;--shiki-dark-font-style:italic"> org</span><span style="color:#212121;--shiki-dark:#C792EA">.</span><span style="color:#D32F2F;font-style:inherit;--shiki-dark:#C792EA;--shiki-dark-font-style:italic">springframework</span><span style="color:#212121;--shiki-dark:#C792EA">.</span><span style="color:#D32F2F;font-style:inherit;--shiki-dark:#C792EA;--shiki-dark-font-style:italic">boot</span><span style="color:#212121;--shiki-dark:#C792EA">.</span><span style="color:#D32F2F;font-style:inherit;--shiki-dark:#C792EA;--shiki-dark-font-style:italic">test</span><span style="color:#212121;--shiki-dark:#C792EA">.</span><span style="color:#D32F2F;font-style:inherit;--shiki-dark:#C792EA;--shiki-dark-font-style:italic">web</span><span style="color:#212121;--shiki-dark:#C792EA">.</span><span style="color:#D32F2F;font-style:inherit;--shiki-dark:#C792EA;--shiki-dark-font-style:italic">server</span><span style="color:#212121;--shiki-dark:#C792EA">.</span><span style="color:#D32F2F;font-style:inherit;--shiki-dark:#C792EA;--shiki-dark-font-style:italic">LocalServerPort</span><span style="color:#24292EFF;--shiki-dark:#D6DEEB">; </span><span style="color:#C2C3C5;font-style:inherit;--shiki-dark:#637777;--shiki-dark-font-style:italic">// Use this for random port</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292EFF;--shiki-dark:#D6DEEB">@</span><span style="color:#D32F2F;--shiki-dark:#C792EA">SpringBootTest</span><span style="color:#24292EFF;--shiki-dark:#D6DEEB">(</span><span style="color:#24292EFF;--shiki-dark:#82AAFF">webEnvironment</span><span style="color:#D32F2F;--shiki-dark:#C792EA"> =</span><span style="color:#1976D2;--shiki-dark:#C5E478"> SpringBootTest</span><span style="color:#212121;--shiki-dark:#D6DEEB">.</span><span style="color:#1976D2;font-style:inherit;--shiki-dark:#FAF39F;--shiki-dark-font-style:italic">WebEnvironment</span><span style="color:#212121;--shiki-dark:#D6DEEB">.</span><span style="color:#1976D2;font-style:inherit;--shiki-dark:#FAF39F;--shiki-dark-font-style:italic">RANDOM_PORT</span><span style="color:#24292EFF;--shiki-dark:#D6DEEB">)</span></span>
+<span class="line"><span style="color:#24292EFF;--shiki-dark:#D6DEEB">@</span><span style="color:#D32F2F;--shiki-dark:#C792EA">Provider</span><span style="color:#24292EFF;--shiki-dark:#D6DEEB">(</span><span style="color:#22863A;--shiki-dark:#D9F5DD">"</span><span style="color:#22863A;--shiki-dark:#ECC48D">petstore-backend</span><span style="color:#22863A;--shiki-dark:#D9F5DD">"</span><span style="color:#24292EFF;--shiki-dark:#D6DEEB">) </span><span style="color:#C2C3C5;font-style:inherit;--shiki-dark:#637777;--shiki-dark-font-style:italic">// Matches the provider name in the contract</span></span>
+<span class="line"><span style="color:#24292EFF;--shiki-dark:#D6DEEB">@</span><span style="color:#D32F2F;--shiki-dark:#C792EA">PactFolder</span><span style="color:#24292EFF;--shiki-dark:#D6DEEB">(</span><span style="color:#22863A;--shiki-dark:#D9F5DD">"</span><span style="color:#22863A;--shiki-dark:#ECC48D">pacts</span><span style="color:#22863A;--shiki-dark:#D9F5DD">"</span><span style="color:#24292EFF;--shiki-dark:#D6DEEB">)         </span><span style="color:#C2C3C5;font-style:inherit;--shiki-dark:#637777;--shiki-dark-font-style:italic">// Directory where pact files are located (relative to test resources)</span></span>
+<span class="line"><span style="color:#D32F2F;font-style:inherit;--shiki-dark:#C792EA;--shiki-dark-font-style:italic">public</span><span style="color:#D32F2F;font-style:inherit;--shiki-dark:#C792EA;--shiki-dark-font-style:italic"> class</span><span style="color:#6F42C1;--shiki-dark:#FFCB8B"> PetApiProviderTest</span><span style="color:#24292EFF;--shiki-dark:#D6DEEB"> {</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292EFF;--shiki-dark:#D6DEEB">    @</span><span style="color:#D32F2F;--shiki-dark:#C792EA">LocalServerPort</span></span>
+<span class="line"><span style="color:#D32F2F;--shiki-dark:#C792EA">    int</span><span style="color:#24292EFF;--shiki-dark:#C5E478"> randomServerPort</span><span style="color:#24292EFF;--shiki-dark:#D6DEEB">; </span><span style="color:#C2C3C5;font-style:inherit;--shiki-dark:#637777;--shiki-dark-font-style:italic">// Inject the random port Spring Boot starts on</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#C2C3C5;font-style:inherit;--shiki-dark:#637777;--shiki-dark-font-style:italic">    // Configure Pact to target the running Spring Boot application</span></span>
+<span class="line"><span style="color:#24292EFF;--shiki-dark:#D6DEEB">    @</span><span style="color:#D32F2F;--shiki-dark:#C792EA">BeforeEach</span></span>
+<span class="line"><span style="color:#D32F2F;--shiki-dark:#C792EA">    void</span><span style="color:#6F42C1;font-style:inherit;--shiki-dark:#82AAFF;--shiki-dark-font-style:italic"> setup</span><span style="color:#24292EFF;--shiki-dark:#D9F5DD">(</span><span style="color:#D32F2F;--shiki-dark:#C792EA">PactVerificationContext</span><span style="color:#24292EFF;--shiki-dark:#D7DBE0"> context</span><span style="color:#24292EFF;--shiki-dark:#D9F5DD">)</span><span style="color:#24292EFF;--shiki-dark:#D6DEEB"> {</span></span>
+<span class="line"><span style="color:#1976D2;--shiki-dark:#C5E478">        context</span><span style="color:#212121;--shiki-dark:#D6DEEB">.</span><span style="color:#6F42C1;font-style:inherit;--shiki-dark:#82AAFF;--shiki-dark-font-style:italic">setTarget</span><span style="color:#24292EFF;--shiki-dark:#D9F5DD">(</span><span style="color:#D32F2F;font-style:inherit;--shiki-dark:#C792EA;--shiki-dark-font-style:italic">new</span><span style="color:#6F42C1;font-style:inherit;--shiki-dark:#82AAFF;--shiki-dark-font-style:italic"> HttpTestTarget</span><span style="color:#6F42C1;--shiki-dark:#D9F5DD">(</span><span style="color:#22863A;--shiki-dark:#D9F5DD">"</span><span style="color:#22863A;--shiki-dark:#ECC48D">localhost</span><span style="color:#22863A;--shiki-dark:#D9F5DD">"</span><span style="color:#212121;--shiki-dark:#82AAFF">,</span><span style="color:#6F42C1;--shiki-dark:#82AAFF"> randomServerPort</span><span style="color:#6F42C1;--shiki-dark:#D9F5DD">)</span><span style="color:#24292EFF;--shiki-dark:#D9F5DD">)</span><span style="color:#24292EFF;--shiki-dark:#D6DEEB">;</span></span>
+<span class="line"><span style="color:#C2C3C5;font-style:inherit;--shiki-dark:#637777;--shiki-dark-font-style:italic">        // For HTTPS: new HttpsTestTarget("localhost", randomServerPort, true) // + Keystore config</span></span>
+<span class="line"><span style="color:#24292EFF;--shiki-dark:#D6DEEB">    }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#C2C3C5;font-style:inherit;--shiki-dark:#637777;--shiki-dark-font-style:italic">    // This test template runs verification for each interaction in the pact file</span></span>
+<span class="line"><span style="color:#24292EFF;--shiki-dark:#D6DEEB">    @</span><span style="color:#D32F2F;--shiki-dark:#C792EA">TestTemplate</span></span>
+<span class="line"><span style="color:#24292EFF;--shiki-dark:#D6DEEB">    @</span><span style="color:#D32F2F;--shiki-dark:#C792EA">ExtendWith</span><span style="color:#24292EFF;--shiki-dark:#D6DEEB">(</span><span style="color:#1976D2;--shiki-dark:#C5E478">PactVerificationSpringProvider</span><span style="color:#212121;--shiki-dark:#D6DEEB">.</span><span style="color:#1976D2;font-style:inherit;--shiki-dark:#FAF39F;--shiki-dark-font-style:italic">class</span><span style="color:#24292EFF;--shiki-dark:#D6DEEB">)</span></span>
+<span class="line"><span style="color:#D32F2F;--shiki-dark:#C792EA">    void</span><span style="color:#6F42C1;font-style:inherit;--shiki-dark:#82AAFF;--shiki-dark-font-style:italic"> pactVerificationTestTemplate</span><span style="color:#24292EFF;--shiki-dark:#D9F5DD">(</span><span style="color:#D32F2F;--shiki-dark:#C792EA">PactVerificationContext</span><span style="color:#24292EFF;--shiki-dark:#D7DBE0"> context</span><span style="color:#24292EFF;--shiki-dark:#D9F5DD">)</span><span style="color:#24292EFF;--shiki-dark:#D6DEEB"> {</span></span>
+<span class="line"><span style="color:#C2C3C5;font-style:inherit;--shiki-dark:#637777;--shiki-dark-font-style:italic">        // This triggers Pact to replay the request from the contract</span></span>
+<span class="line"><span style="color:#C2C3C5;font-style:inherit;--shiki-dark:#637777;--shiki-dark-font-style:italic">        // and compare the actual response from the provider against the expected response</span></span>
+<span class="line"><span style="color:#1976D2;--shiki-dark:#C5E478">        context</span><span style="color:#212121;--shiki-dark:#D6DEEB">.</span><span style="color:#6F42C1;font-style:inherit;--shiki-dark:#82AAFF;--shiki-dark-font-style:italic">verifyInteraction</span><span style="color:#24292EFF;--shiki-dark:#D9F5DD">()</span><span style="color:#24292EFF;--shiki-dark:#D6DEEB">;</span></span>
+<span class="line"><span style="color:#24292EFF;--shiki-dark:#D6DEEB">    }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#C2C3C5;font-style:inherit;--shiki-dark:#637777;--shiki-dark-font-style:italic">    // --- State Handlers ---</span></span>
+<span class="line"><span style="color:#C2C3C5;font-style:inherit;--shiki-dark:#637777;--shiki-dark-font-style:italic">    // These methods are called by Pact BEFORE replaying an interaction</span></span>
+<span class="line"><span style="color:#C2C3C5;font-style:inherit;--shiki-dark:#637777;--shiki-dark-font-style:italic">    // that requires a specific provider state.</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292EFF;--shiki-dark:#D6DEEB">    @</span><span style="color:#D32F2F;--shiki-dark:#C792EA">State</span><span style="color:#24292EFF;--shiki-dark:#D6DEEB">(</span><span style="color:#22863A;--shiki-dark:#D9F5DD">"</span><span style="color:#22863A;--shiki-dark:#ECC48D">a pet with ID 123 exists</span><span style="color:#22863A;--shiki-dark:#D9F5DD">"</span><span style="color:#24292EFF;--shiki-dark:#D6DEEB">) </span><span style="color:#C2C3C5;font-style:inherit;--shiki-dark:#637777;--shiki-dark-font-style:italic">// Matches the 'state' from the consumer test</span></span>
+<span class="line"><span style="color:#D32F2F;font-style:inherit;--shiki-dark:#C792EA;--shiki-dark-font-style:italic">    public</span><span style="color:#D32F2F;--shiki-dark:#C792EA"> void</span><span style="color:#6F42C1;font-style:inherit;--shiki-dark:#82AAFF;--shiki-dark-font-style:italic"> pet123Exists</span><span style="color:#24292EFF;--shiki-dark:#D9F5DD">()</span><span style="color:#24292EFF;--shiki-dark:#D6DEEB"> {</span></span>
+<span class="line"><span style="color:#C2C3C5;font-style:inherit;--shiki-dark:#637777;--shiki-dark-font-style:italic">        // Setup logic: Ensure that when the API receives GET /pets/123,</span></span>
+<span class="line"><span style="color:#C2C3C5;font-style:inherit;--shiki-dark:#637777;--shiki-dark-font-style:italic">        // it will find and return the pet "Fido".</span></span>
+<span class="line"><span style="color:#C2C3C5;font-style:inherit;--shiki-dark:#637777;--shiki-dark-font-style:italic">        // Examples:</span></span>
+<span class="line"><span style="color:#C2C3C5;font-style:inherit;--shiki-dark:#637777;--shiki-dark-font-style:italic">        // - Insert data into an in-memory DB (H2)</span></span>
+<span class="line"><span style="color:#C2C3C5;font-style:inherit;--shiki-dark:#637777;--shiki-dark-font-style:italic">        // - Configure mock beans (if using Mockito for dependencies)</span></span>
+<span class="line"><span style="color:#C2C3C5;font-style:inherit;--shiki-dark:#637777;--shiki-dark-font-style:italic">        // - Reset state before each state setup if needed</span></span>
+<span class="line"><span style="color:#1976D2;--shiki-dark:#C5E478">        System</span><span style="color:#212121;--shiki-dark:#D6DEEB">.</span><span style="color:#1976D2;font-style:inherit;--shiki-dark:#FAF39F;--shiki-dark-font-style:italic">out</span><span style="color:#212121;--shiki-dark:#D6DEEB">.</span><span style="color:#6F42C1;font-style:inherit;--shiki-dark:#82AAFF;--shiki-dark-font-style:italic">println</span><span style="color:#24292EFF;--shiki-dark:#D9F5DD">(</span><span style="color:#22863A;--shiki-dark:#D9F5DD">"</span><span style="color:#22863A;--shiki-dark:#ECC48D">Provider state setup: Ensuring pet with ID 123 exists.</span><span style="color:#22863A;--shiki-dark:#D9F5DD">"</span><span style="color:#24292EFF;--shiki-dark:#D9F5DD">)</span><span style="color:#24292EFF;--shiki-dark:#D6DEEB">;</span></span>
+<span class="line"><span style="color:#C2C3C5;font-style:inherit;--shiki-dark:#637777;--shiki-dark-font-style:italic">        // petRepository.save(new Pet(123L, "Fido", "available")); // Example</span></span>
+<span class="line"><span style="color:#24292EFF;--shiki-dark:#D6DEEB">    }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292EFF;--shiki-dark:#D6DEEB">    @</span><span style="color:#D32F2F;--shiki-dark:#C792EA">State</span><span style="color:#24292EFF;--shiki-dark:#D6DEEB">(</span><span style="color:#22863A;--shiki-dark:#D9F5DD">"</span><span style="color:#22863A;--shiki-dark:#ECC48D">no pets exist</span><span style="color:#22863A;--shiki-dark:#D9F5DD">"</span><span style="color:#24292EFF;--shiki-dark:#D6DEEB">) </span><span style="color:#C2C3C5;font-style:inherit;--shiki-dark:#637777;--shiki-dark-font-style:italic">// Example for another interaction (e.g., GET /pets returns empty list)</span></span>
+<span class="line"><span style="color:#D32F2F;font-style:inherit;--shiki-dark:#C792EA;--shiki-dark-font-style:italic">    public</span><span style="color:#D32F2F;--shiki-dark:#C792EA"> void</span><span style="color:#6F42C1;font-style:inherit;--shiki-dark:#82AAFF;--shiki-dark-font-style:italic"> noPetsExist</span><span style="color:#24292EFF;--shiki-dark:#D9F5DD">()</span><span style="color:#24292EFF;--shiki-dark:#D6DEEB"> {</span></span>
+<span class="line"><span style="color:#1976D2;--shiki-dark:#C5E478">        System</span><span style="color:#212121;--shiki-dark:#D6DEEB">.</span><span style="color:#1976D2;font-style:inherit;--shiki-dark:#FAF39F;--shiki-dark-font-style:italic">out</span><span style="color:#212121;--shiki-dark:#D6DEEB">.</span><span style="color:#6F42C1;font-style:inherit;--shiki-dark:#82AAFF;--shiki-dark-font-style:italic">println</span><span style="color:#24292EFF;--shiki-dark:#D9F5DD">(</span><span style="color:#22863A;--shiki-dark:#D9F5DD">"</span><span style="color:#22863A;--shiki-dark:#ECC48D">Provider state setup: Ensuring no pets exist.</span><span style="color:#22863A;--shiki-dark:#D9F5DD">"</span><span style="color:#24292EFF;--shiki-dark:#D9F5DD">)</span><span style="color:#24292EFF;--shiki-dark:#D6DEEB">;</span></span>
+<span class="line"><span style="color:#C2C3C5;font-style:inherit;--shiki-dark:#637777;--shiki-dark-font-style:italic">        // petRepository.deleteAll(); // Example</span></span>
+<span class="line"><span style="color:#24292EFF;--shiki-dark:#D6DEEB">    }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#C2C3C5;font-style:inherit;--shiki-dark:#637777;--shiki-dark-font-style:italic">    // Add more @State methods for other preconditions defined in consumer contracts</span></span>
+<span class="line"><span style="color:#24292EFF;--shiki-dark:#D6DEEB">}</span></span>
+<span class="line"></span></code></pre>
+</li>
+<li>
+<p><strong>Run Provider Verification:</strong>
+Executing this JUnit test will:</p>
+<ul>
+<li>Start your Spring Boot application on a random port.</li>
+<li>Pact locates the <code>petstore-frontend-petstore-backend.json</code> file in <code>src/test/resources/pacts</code>.</li>
+<li>For the interaction <code>a request to fetch pet details for ID 123</code>:
+<ul>
+<li>Pact calls the <code>@State("a pet with ID 123 exists")</code> method (<code>pet123Exists</code>).</li>
+<li>Pact sends a real HTTP <code>GET</code> request to <code>http://localhost:&#x3C;randomPort>/pets/123</code>.</li>
+<li>Pact compares the actual HTTP response (status, headers, body) from your running application against the <code>willRespondWith</code> section defined in the pact file.</li>
+</ul>
+</li>
+<li>If the actual response matches the expected response, the test passes. If not, it fails, indicating a contract violation.</li>
+</ul>
+</li>
+</ol>
+<p><strong>Workflow Without a Broker: Recap</strong></p>
+<ul>
+<li><strong>Contract Generation:</strong> Consumer test produces a <code>.json</code> file.</li>
+<li><strong>Contract Sharing:</strong> Manually transfer the file to the provider project.</li>
+<li><strong>Provider Verification:</strong> Provider test loads the file from its local filesystem.</li>
+<li><strong>Limitations:</strong> Manual sharing is error-prone and doesn’t scale well. There’s no central tracking of contract versions or verification results.</li>
+</ul>
+<p>This local approach is feasible for small projects or initial adoption, but for larger systems, we need a better way to manage contracts.</p>
+<h2 id="scaling-up-using-the-pact-broker-for-collaboration">Scaling Up: Using the Pact Broker for Collaboration</h2>
+<p>The <strong>Pact Broker</strong> is a dedicated application that acts as a central repository for sharing pact files and verification results. It transforms contract testing from a manual file-sharing process into a collaborative, automated workflow.</p>
+<p><strong>Key Benefits of Using a Pact Broker:</strong></p>
+<ol>
+<li><strong>Centralized Contract Repository:</strong> Consumers publish pacts directly to the broker. Providers fetch the contracts they need to verify from the broker. No more manual file transfers!</li>
+<li><strong>Decoupled Deployments with Safety:</strong> The broker tracks which versions of consumers and providers are compatible based on successful verifications. This is crucial for independent releases.</li>
+<li><strong>Visibility of Verification Results:</strong> Providers publish their verification outcomes back to the broker. Both teams can see the compatibility status (e.g., “Consumer v1.2 contract PASSED verification against Provider v3.4”).</li>
+<li><strong>Automated Workflows via Webhooks:</strong> Configure the broker to trigger provider builds automatically whenever a consumer publishes a new or updated pact. This ensures immediate feedback on contract changes.</li>
+<li><strong>Versioning and Tagging:</strong> Contracts and verification results are versioned. Tags (e.g., <code>prod</code>, <code>staging</code>, <code>feat/user-auth</code>) allow managing contracts across different environments and feature branches.</li>
+<li><strong>Network Visualization and Documentation:</strong> The broker UI provides a graph of service interactions and human-readable contract details, acting as live API documentation derived from tests.</li>
+<li><strong>Backward Compatibility Checks:</strong> Providers can verify against multiple tagged consumer contracts (e.g., the <code>prod</code> version and the latest <code>dev</code> version) to ensure non-breaking changes.</li>
+</ol>
+<p><strong>Setting Up:</strong> You can self-host the open-source Pact Broker (e.g., using Docker) or use <strong>PactFlow</strong>, the commercial, fully managed SaaS platform built by the Pact maintainers.</p>
+<p><strong>Typical CI/CD Flow with Pact Broker:</strong></p>
+<ol>
+<li><strong>Consumer CI:</strong>
+<ul>
+<li>Run consumer contract tests (generates pact file locally).</li>
+<li>Publish the pact file to the Pact Broker, tagging it with the consumer version and potentially the environment/branch (e.g., <code>version: 1.2.3</code>, <code>tag: prod</code>).</li>
+</ul>
+</li>
+<li><strong>Provider CI:</strong>
+<ul>
+<li>(Triggered manually, scheduled, or by webhook) Fetch the relevant pacts from the Broker (e.g., “latest pacts for consumers tagged <code>prod</code>” or “latest pact for consumer <code>petstore-frontend</code> on branch <code>main</code>”).</li>
+<li>Run provider verification against these pacts.</li>
+<li>Publish verification results back to the Broker, indicating success or failure for the specific provider version and pact version.</li>
+</ul>
+</li>
+<li><strong>Deployment Gate (Optional but Recommended):</strong>
+<ul>
+<li>Before deploying a service (consumer or provider), use the <code>can-i-deploy</code> tool (see next section) to query the Broker: “Is this version compatible with the versions of its dependencies/dependents currently in the target environment (e.g., <code>prod</code>)?”</li>
+</ul>
+</li>
+</ol>
+<h2 id="managing-contracts-across-environments-dev-staging-prod">Managing Contracts Across Environments (Dev, Staging, Prod)</h2>
+<p>Real-world applications have multiple environments. A provider change deployed to <code>staging</code> shouldn’t break the <code>prod</code> consumer. Pact Broker/PactFlow handles this using <strong>tags</strong> and <strong>environments</strong>.</p>
+<ul>
+<li><strong>Tags:</strong> Simple labels applied to specific consumer/provider versions (e.g., <code>prod</code>, <code>staging</code>, <code>test</code>, <code>feat-xyz</code>). When publishing pacts or results, you include relevant tags. Provider verification can then target pacts with specific tags (e.g., “verify all pacts tagged <code>prod</code>”).</li>
+<li><strong>Environments (PactFlow):</strong> A more structured concept in PactFlow, representing deployment environments. You record deployments of service versions to specific environments (e.g., “deployed <code>petstore-backend</code> version <code>2.1.0</code> to <code>prod</code>”). Verification checks can then be tied to these environments.</li>
+</ul>
+<p><strong>Example Scenario:</strong></p>
+<ol>
+<li><code>petstore-frontend</code> v1.0 is in <code>prod</code>. Its pact is tagged <code>prod</code> on the Broker.</li>
+<li><code>petstore-backend</code> CI pipeline, before deploying to <code>prod</code>, fetches and verifies the <code>petstore-frontend</code> pact tagged <code>prod</code>.</li>
+<li><code>petstore-frontend</code> team develops v1.1 on branch <code>feat/new-feature</code>. They run consumer tests and publish the new pact to the Broker, tagged <code>feat/new-feature</code>.</li>
+<li><code>petstore-backend</code> CI pipeline (perhaps triggered by a webhook) fetches the <code>feat/new-feature</code> pact and runs verification.
+<ul>
+<li>If it passes, great! The backend already supports the new feature’s requirements.</li>
+<li>If it fails, the <code>petstore-backend</code> team knows they need to make changes <em>before</em> the frontend feature merges and deploys.</li>
+</ul>
+</li>
+<li>Once <code>petstore-frontend</code> v1.1 is deployed to <code>prod</code>, its pact is tagged <code>prod</code>. The <em>next</em> <code>petstore-backend</code> deployment to <code>prod</code> will verify against this new <code>prod</code> pact.</li>
+</ol>
+<p>This mechanism ensures compatibility checks are relevant to the specific stage of the development and deployment lifecycle, enabling safe, independent progression of services.</p>
+<h2 id="safe-releases-with-can-i-deploy-and-pactflow">Safe Releases with “Can I Deploy” and PactFlow</h2>
+<p>The <strong><code>can-i-deploy</code></strong> tool (part of the Pact Broker CLI) is a cornerstone of safe continuous delivery with Pact. It answers the critical question: <em>“Is it safe to deploy this version of my service to this environment?”</em></p>
+<p><strong>How it Works:</strong></p>
+<ol>
+<li>You run the command in your CI/CD pipeline <em>before</em> deployment.</li>
+<li>Example: <code>pact-broker can-i-deploy --pacticipant petstore-backend --version 2.1.0 --to-environment prod</code></li>
+<li>The tool queries the Pact Broker:
+<ul>
+<li>“For <code>petstore-backend</code> version <code>2.1.0</code>…”</li>
+<li>“…find all the contracts (pacts) it needs to fulfill for consumers that are currently deployed in <code>prod</code> (or tagged <code>prod</code>).”</li>
+<li>“…check if <code>petstore-backend</code> version <code>2.1.0</code> has successfully verified <em>all</em> of those required pacts.”</li>
+<li>(It also works the other way: a consumer can check if its pact has been verified by the provider version in the target environment).</li>
+</ul>
+</li>
+<li><strong>Result:</strong>
+<ul>
+<li>If all required verifications are successful -> Exit code 0 (Safe to deploy).</li>
+<li>If any verification is missing or failed -> Exit code 1 (Do NOT deploy!).</li>
+</ul>
+</li>
+</ol>
+<p><strong>Benefits:</strong></p>
+<ul>
+<li><strong>Automated Safety Gate:</strong> Prevents deploying versions that are known to be incompatible with services already running in the target environment.</li>
+<li><strong>Eliminates Guesswork:</strong> Replaces manual checks, spreadsheets, or hoping for the best.</li>
+<li><strong>Increases Deployment Confidence:</strong> Empowers teams to deploy frequently and independently, knowing this check provides a safety net.</li>
+</ul>
+<p><strong>PactFlow</strong> provides a visual representation of this compatibility matrix in its UI, making it easy to see the status across versions and environments, complementing the CLI tool for operational visibility.</p>
+<h2 id="pact-vs-other-contract-testing-approaches">Pact vs. Other Contract Testing Approaches</h2>
+<p>Pact is excellent, but it’s worth knowing the landscape:</p>
+<ol>
+<li>
+<p><strong>Spring Cloud Contract (SCC):</strong></p>
+<ul>
+<li><strong>Focus:</strong> Primarily Java/Spring ecosystem.</li>
+<li><strong>Approach:</strong> Often provider-driven or shared-contract (Groovy/YAML DSL). Contracts define stubs (for consumers) and tests (for providers).</li>
+<li><strong>Pros:</strong> Deep integration with Spring, auto-generates stubs/tests.</li>
+<li><strong>Cons:</strong> Less language-agnostic than Pact. Consumer doesn’t <em>always</em> drive the contract definition initially.</li>
+<li><strong>Choose If:</strong> Your ecosystem is heavily Spring-based, and you prefer contract definitions in DSL over code-generated examples.</li>
+</ul>
+</li>
+<li>
+<p><strong>OpenAPI/Swagger + Schema Validation:</strong></p>
+<ul>
+<li><strong>Focus:</strong> API design and documentation (schema-first).</li>
+<li><strong>Approach:</strong> Define API structure (paths, parameters, request/response schemas) in OpenAPI spec (YAML/JSON). Tools can generate client/server code and validate requests/responses against the schema.</li>
+<li><strong>Pros:</strong> Widely adopted standard, great for documentation and code generation, catches basic structural mismatches.</li>
+<li><strong>Cons:</strong> <strong>Static contract.</strong> Doesn’t verify specific interaction <em>examples</em> or guarantee provider implementation matches the spec perfectly in all cases. Doesn’t capture <em>consumer-specific</em> expectations (e.g., a consumer might only use 3 fields out of 10). Producer/design-driven.</li>
+<li><strong>Complementary:</strong> Use OpenAPI for design/docs, use Pact for verifying specific consumer-driven interaction examples against the actual implementation. PactFlow can even compare Pact contracts against OpenAPI specs.</li>
+</ul>
+</li>
+<li>
+<p><strong>GraphQL:</strong></p>
+<ul>
+<li><strong>Focus:</strong> Strongly typed API queries.</li>
+<li><strong>Approach:</strong> Schema is the contract. Introspection allows clients to fetch the schema. Backward compatibility is often handled by deprecating fields rather than removing them.</li>
+<li><strong>Pros:</strong> Built-in typing and schema enforcement reduce certain types of contract issues.</li>
+<li><strong>Cons:</strong> Doesn’t inherently test that resolvers behave as expected for specific query examples. Breaking changes are still possible if not careful.</li>
+<li><strong>Pact for GraphQL:</strong> Pact can be used (sometimes via plugins or specific strategies) to test specific GraphQL query/mutation examples between client and server. Tools like Specmatic also target GraphQL contract testing from schemas.</li>
+</ul>
+</li>
+<li>
+<p><strong>Other Tools:</strong></p>
+<ul>
+<li><strong>Karate DSL:</strong> General-purpose API testing framework that includes contract testing capabilities.</li>
+<li><strong>Specmatic:</strong> Uses OpenAPI/GraphQL specs as executable contracts, focusing on spec compliance.</li>
+</ul>
+</li>
+</ol>
+<p><strong>Choosing the Right Tool:</strong></p>
+<ul>
+<li><strong>Polyglot environment?</strong> Pact’s language agnosticism is a major advantage.</li>
+<li><strong>Prioritize consumer needs driving compatibility?</strong> Pact’s CDC focus is ideal.</li>
+<li><strong>Heavily invested in Spring?</strong> Spring Cloud Contract is a strong contender.</li>
+<li><strong>Need basic schema alignment and docs?</strong> OpenAPI is essential, potentially augmented by Pact or other tools for runtime verification.</li>
+</ul>
+<h2 id="conclusion-build-resilient-systems-with-confidence">Conclusion: Build Resilient Systems with Confidence</h2>
+<p>Contract testing with Pact offers a pragmatic and powerful way to tackle the integration challenges inherent in microservice and distributed architectures. By shifting from slow, brittle end-to-end tests to fast, focused contract verification at service boundaries, you gain:</p>
+<ul>
+<li><strong>Early detection</strong> of integration issues.</li>
+<li><strong>Faster feedback loops</strong> for developers.</li>
+<li><strong>Increased confidence</strong> for independent deployments.</li>
+<li><strong>Living documentation</strong> of API interactions.</li>
+</ul>
+<p>We’ve seen how to implement Pact tests using TypeScript and Java, explored the crucial role of the <strong>Pact Broker</strong> in scaling contract testing through centralized management and automated workflows, and understood how tools like <strong><code>can-i-deploy</code></strong> provide essential safety gates for CI/CD pipelines.</p>
+<p>While alternatives exist, Pact’s consumer-driven approach, strong multi-language support, and mature ecosystem (including PactFlow) make it a compelling choice for many teams building modern applications.</p>
+<p>Embrace contract testing, reduce your reliance on flaky integration tests, and start deploying your services with greater speed and confidence. Happy contract testing!</p> </article> <ul class="my-8 astro-vj4tpspi"> <li class="inline-block my-1 underline-offset-4 astro-blwjyjpt"> <a href="/tags/pact/" class="text-sm pr-2 group astro-blwjyjpt" data-astro-transition-scope="astro-36ssibgs-2"> <svg xmlns="http://www.w3.org/2000/svg" class=" scale-75 astro-blwjyjpt"><path d="M16.018 3.815 15.232 8h-4.966l.716-3.815-1.964-.37L8.232 8H4v2h3.857l-.751 4H3v2h3.731l-.714 3.805 1.965.369L8.766 16h4.966l-.714 3.805 1.965.369.783-4.174H20v-2h-3.859l.751-4H21V8h-3.733l.716-3.815-1.965-.37zM14.106 14H9.141l.751-4h4.966l-.752 4z" class="astro-blwjyjpt"></path> </svg>
+&nbsp;<span class="astro-blwjyjpt">pact</span> </a> </li> <li class="inline-block my-1 underline-offset-4 astro-blwjyjpt"> <a href="/tags/contract/" class="text-sm pr-2 group astro-blwjyjpt" data-astro-transition-scope="astro-36ssibgs-3"> <svg xmlns="http://www.w3.org/2000/svg" class=" scale-75 astro-blwjyjpt"><path d="M16.018 3.815 15.232 8h-4.966l.716-3.815-1.964-.37L8.232 8H4v2h3.857l-.751 4H3v2h3.731l-.714 3.805 1.965.369L8.766 16h4.966l-.714 3.805 1.965.369.783-4.174H20v-2h-3.859l.751-4H21V8h-3.733l.716-3.815-1.965-.37zM14.106 14H9.141l.751-4h4.966l-.752 4z" class="astro-blwjyjpt"></path> </svg>
+&nbsp;<span class="astro-blwjyjpt">contract</span> </a> </li>  </ul> <div class="flex flex-col-reverse items-center justify-between gap-6 sm:flex-row-reverse sm:items-end sm:gap-4 astro-vj4tpspi"> <button id="back-to-top" class="focus-outline whitespace-nowrap py-1 hover:opacity-75 astro-vj4tpspi"> <svg xmlns="http://www.w3.org/2000/svg" class="rotate-90 astro-vj4tpspi"> <path d="M13.293 6.293 7.586 12l5.707 5.707 1.414-1.414L10.414 12l4.293-4.293z" class="astro-vj4tpspi"></path> </svg> <span class="astro-vj4tpspi">Back to Top</span> </button> <div class="social-icons astro-wkojbtzc"> <span class="italic astro-wkojbtzc">Share this post on:</span> <div class="text-center astro-wkojbtzc"> <a href="https://x.com/intent/post?url=https://testforge.blog/posts/004-pact-contract-testing/" class="group inline-block hover:text-skin-accent link-button astro-wkojbtzc" title="Share this post on X"> <svg  
+      xmlns="http://www.w3.org/2000/svg"
+      class="icon-tabler"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    >
+      <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+      <path d="M4 4l11.733 16h4.267l-11.733 -16z" /><path d="M4 20l6.768 -6.768m2.46 -2.46l6.772 -6.772" />
+    </svg> <span class="sr-only astro-wkojbtzc">Share this post on X</span> </a><a href="https://t.me/share/url?url=https://testforge.blog/posts/004-pact-contract-testing/" class="group inline-block hover:text-skin-accent link-button astro-wkojbtzc" title="Share this post via Telegram"> <svg
+        xmlns="http://www.w3.org/2000/svg"
+        class="icon-tabler"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+        <path d="M15 10l-4 4l6 6l4 -16l-18 7l4 2l2 6l3 -4"></path>
+      </svg> <span class="sr-only astro-wkojbtzc">Share this post via Telegram</span> </a><a href="https://wa.me/?text=https://testforge.blog/posts/004-pact-contract-testing/" class="group inline-block hover:text-skin-accent link-button astro-wkojbtzc" title="Share this post via WhatsApp"> <svg
+      xmlns="http://www.w3.org/2000/svg"
+      class="icon-tabler"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    >
+      <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+      <path d="M3 21l1.65 -3.8a9 9 0 1 1 3.4 2.9l-5.05 .9"></path>
+      <path d="M9 10a0.5 .5 0 0 0 1 0v-1a0.5 .5 0 0 0 -1 0v1a5 5 0 0 0 5 5h1a0.5 .5 0 0 0 0 -1h-1a0.5 .5 0 0 0 0 1"></path>
+    </svg> <span class="sr-only astro-wkojbtzc">Share this post via WhatsApp</span> </a><a href="https://www.facebook.com/sharer.php?u=https://testforge.blog/posts/004-pact-contract-testing/" class="group inline-block hover:text-skin-accent link-button astro-wkojbtzc" title="Share this post on Facebook"> <svg
+    xmlns="http://www.w3.org/2000/svg"
+    class="icon-tabler"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  >
+    <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+    <path
+      d="M7 10v4h3v7h4v-7h3l1 -4h-4v-2a1 1 0 0 1 1 -1h3v-4h-3a5 5 0 0 0 -5 5v2h-3"
+    ></path>
+  </svg> <span class="sr-only astro-wkojbtzc">Share this post on Facebook</span> </a><a href="mailto:?subject=See%20this%20post&#38;body=https://testforge.blog/posts/004-pact-contract-testing/" class="group inline-block hover:text-skin-accent link-button astro-wkojbtzc" title="Share this post via email"> <svg
+      xmlns="http://www.w3.org/2000/svg"
+      class="icon-tabler"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    >
+      <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+      <rect x="3" y="5" width="18" height="14" rx="2"></rect>
+      <polyline points="3 7 12 13 21 7"></polyline>
+    </svg> <span class="sr-only astro-wkojbtzc">Share this post via email</span> </a> </div> </div>  </div> <hr class="my-6 border-dashed astro-vj4tpspi"> <!-- Previous/Next Post Buttons --> <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 astro-vj4tpspi"> <a href="/posts/005-k6-performance-testing" class="flex w-full gap-1 hover:opacity-75 astro-vj4tpspi"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-chevron-left flex-none astro-vj4tpspi">  <path stroke="none" d="M0 0h24v24H0z" fill="none" class="astro-vj4tpspi"></path> <path d="M15 6l-6 6l6 6" class="astro-vj4tpspi"></path>  </svg> <div class="astro-vj4tpspi"> <span class="astro-vj4tpspi">Previous Post</span> <div class="text-sm text-skin-accent/85 astro-vj4tpspi">Performance Testing using k6</div> </div> </a> <a href="/posts/003-idea-ai-chats" class="flex w-full justify-end gap-1 text-right hover:opacity-75 sm:col-start-2 astro-vj4tpspi"> <div class="astro-vj4tpspi"> <span class="astro-vj4tpspi">Next Post</span> <div class="text-sm text-skin-accent/85 astro-vj4tpspi">AI-powered Integrated Development Environments (IDEs)</div> </div> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-chevron-right flex-none astro-vj4tpspi">  <path stroke="none" d="M0 0h24v24H0z" fill="none" class="astro-vj4tpspi"></path> <path d="M9 6l6 6l-6 6" class="astro-vj4tpspi"></path>  </svg> </a> </div> </main> <footer class="w-full mt-auto astro-sz7xmlte"> <div class="max-w-3xl mx-auto px-0"> <hr class="border-skin-line" aria-hidden="true"> </div> <div class="flex flex-col items-center justify-between py-6 astro-sz7xmlte"> <div class="flex items-center justify-between w-full astro-sz7xmlte"> <style>astro-island,astro-slot,astro-static-slot{display:contents}</style><script>(()=>{var e=async t=>{await(await t())()};(self.Astro||(self.Astro={})).load=e;window.dispatchEvent(new Event("astro:load"));})();;(()=>{var A=Object.defineProperty;var g=(i,o,a)=>o in i?A(i,o,{enumerable:!0,configurable:!0,writable:!0,value:a}):i[o]=a;var d=(i,o,a)=>g(i,typeof o!="symbol"?o+"":o,a);{let i={0:t=>m(t),1:t=>a(t),2:t=>new RegExp(t),3:t=>new Date(t),4:t=>new Map(a(t)),5:t=>new Set(a(t)),6:t=>BigInt(t),7:t=>new URL(t),8:t=>new Uint8Array(t),9:t=>new Uint16Array(t),10:t=>new Uint32Array(t),11:t=>1/0*t},o=t=>{let[l,e]=t;return l in i?i[l](e):void 0},a=t=>t.map(o),m=t=>typeof t!="object"||t===null?t:Object.fromEntries(Object.entries(t).map(([l,e])=>[l,o(e)]));class y extends HTMLElement{constructor(){super(...arguments);d(this,"Component");d(this,"hydrator");d(this,"hydrate",async()=>{var b;if(!this.hydrator||!this.isConnected)return;let e=(b=this.parentElement)==null?void 0:b.closest("astro-island[ssr]");if(e){e.addEventListener("astro:hydrate",this.hydrate,{once:!0});return}let c=this.querySelectorAll("astro-slot"),n={},h=this.querySelectorAll("template[data-astro-template]");for(let r of h){let s=r.closest(this.tagName);s!=null&&s.isSameNode(this)&&(n[r.getAttribute("data-astro-template")||"default"]=r.innerHTML,r.remove())}for(let r of c){let s=r.closest(this.tagName);s!=null&&s.isSameNode(this)&&(n[r.getAttribute("name")||"default"]=r.innerHTML)}let p;try{p=this.hasAttribute("props")?m(JSON.parse(this.getAttribute("props"))):{}}catch(r){let s=this.getAttribute("component-url")||"<unknown>",v=this.getAttribute("component-export");throw v&&(s+=` (export ${v})`),console.error(`[hydrate] Error parsing props for component ${s}`,this.getAttribute("props"),r),r}let u;await this.hydrator(this)(this.Component,p,n,{client:this.getAttribute("client")}),this.removeAttribute("ssr"),this.dispatchEvent(new CustomEvent("astro:hydrate"))});d(this,"unmount",()=>{this.isConnected||this.dispatchEvent(new CustomEvent("astro:unmount"))})}disconnectedCallback(){document.removeEventListener("astro:after-swap",this.unmount),document.addEventListener("astro:after-swap",this.unmount,{once:!0})}connectedCallback(){if(!this.hasAttribute("await-children")||document.readyState==="interactive"||document.readyState==="complete")this.childrenConnectedCallback();else{let e=()=>{document.removeEventListener("DOMContentLoaded",e),c.disconnect(),this.childrenConnectedCallback()},c=new MutationObserver(()=>{var n;((n=this.lastChild)==null?void 0:n.nodeType)===Node.COMMENT_NODE&&this.lastChild.nodeValue==="astro:end"&&(this.lastChild.remove(),e())});c.observe(this,{childList:!0}),document.addEventListener("DOMContentLoaded",e)}}async childrenConnectedCallback(){let e=this.getAttribute("before-hydration-url");e&&await import(e),this.start()}async start(){let e=JSON.parse(this.getAttribute("opts")),c=this.getAttribute("client");if(Astro[c]===void 0){window.addEventListener(`astro:${c}`,()=>this.start(),{once:!0});return}try{await Astro[c](async()=>{let n=this.getAttribute("renderer-url"),[h,{default:p}]=await Promise.all([import(this.getAttribute("component-url")),n?import(n):()=>()=>{}]),u=this.getAttribute("component-export")||"default";if(!u.includes("."))this.Component=h[u];else{this.Component=h;for(let f of u.split("."))this.Component=this.Component[f]}return this.hydrator=p,this.hydrate},e,this)}catch(n){console.error(`[astro-island] Error hydrating ${this.getAttribute("component-url")}`,n)}}attributeChangedCallback(){this.hydrate()}}d(y,"observedAttributes",["props"]),customElements.get("astro-island")||customElements.define("astro-island",y)}})();</script><astro-island uid="225oJD" prefix="r1" component-url="/_astro/CookieConsent.DX0I9ntb.js" component-export="default" renderer-url="/_astro/client.f-r63Uvi.js" props="{}" ssr="" client="load" opts="{&quot;name&quot;:&quot;CookieConsent&quot;,&quot;value&quot;:true}" await-children=""><div><button class="hover:text-skin-accent">Cookie Settings</button></div><!--astro:end--></astro-island> <div class="social-icons flex  astro-upu6fzxr"> <a href="https://github.com/testforgeio/testforge" class="group inline-block hover:text-skin-accent link-button astro-upu6fzxr" title=" testforge on Github"> <svg
+    xmlns="http://www.w3.org/2000/svg"
+    class="icon-tabler"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  >
+    <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+    <path
+      d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2a4.6 4.6 0 0 0 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5"
+    ></path>
+  </svg> <span class="sr-only astro-upu6fzxr"> testforge on Github</span> </a><a href="https://x.com/testforgeio" class="group inline-block hover:text-skin-accent link-button astro-upu6fzxr" title="testforge on X"> <svg  
+      xmlns="http://www.w3.org/2000/svg"
+      class="icon-tabler"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    >
+      <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+      <path d="M4 4l11.733 16h4.267l-11.733 -16z" /><path d="M4 20l6.768 -6.768m2.46 -2.46l6.772 -6.772" />
+    </svg> <span class="sr-only astro-upu6fzxr">testforge on X</span> </a><a href="https://www.tiktok.com/@testforge" class="group inline-block hover:text-skin-accent link-button astro-upu6fzxr" title="testforge on TikTok"> <svg
+      xmlns="http://www.w3.org/2000/svg"
+      class="icon-tabler"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    >
+      <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+      <path d="M9 12a4 4 0 1 0 4 4v-12a5 5 0 0 0 5 5"></path>
+    </svg> <span class="sr-only astro-upu6fzxr">testforge on TikTok</span> </a> </div>  </div> <div class="my-2 flex flex-col items-center whitespace-nowrap sm:flex-row astro-sz7xmlte"> <span class="astro-sz7xmlte">Copyright &#169; 2025</span> <span class="hidden sm:inline astro-sz7xmlte">&nbsp;|&nbsp;</span> <span class="astro-sz7xmlte">testforge. All rights reserved.</span> </div> </div> </footer>   </body></html>  <script data-astro-rerun>
+  /** Create a progress indicator
+   *  at the top */
+  function createProgressBar() {
+    // Create the main container div
+    const progressContainer = document.createElement("div");
+    progressContainer.className =
+      "progress-container fixed top-0 z-10 h-1 w-full bg-skin-fill";
+
+    // Create the progress bar div
+    const progressBar = document.createElement("div");
+    progressBar.className = "progress-bar h-1 w-0 bg-skin-accent";
+    progressBar.id = "myBar";
+
+    // Append the progress bar to the progress container
+    progressContainer.appendChild(progressBar);
+
+    // Append the progress container to the document body or any other desired parent element
+    document.body.appendChild(progressContainer);
+  }
+  createProgressBar();
+
+  /** Update the progress bar
+   *  when user scrolls */
+  function updateScrollProgress() {
+    document.addEventListener("scroll", () => {
+      const winScroll =
+        document.body.scrollTop || document.documentElement.scrollTop;
+      const height =
+        document.documentElement.scrollHeight -
+        document.documentElement.clientHeight;
+      const scrolled = (winScroll / height) * 100;
+      if (document) {
+        const myBar = document.getElementById("myBar");
+        if (myBar) {
+          myBar.style.width = scrolled + "%";
+        }
+      }
+    });
+  }
+  updateScrollProgress();
+
+  /** Attaches links to headings in the document,
+   *  allowing sharing of sections easily */
+  function addHeadingLinks() {
+    const headings = Array.from(
+      document.querySelectorAll("h2, h3, h4, h5, h6")
+    );
+    for (const heading of headings) {
+      heading.classList.add("group");
+      const link = document.createElement("a");
+      link.className =
+        "heading-link ml-2 opacity-0 group-hover:opacity-100 focus:opacity-100";
+      link.href = "#" + heading.id;
+
+      const span = document.createElement("span");
+      span.ariaHidden = "true";
+      span.innerText = "#";
+      link.appendChild(span);
+      heading.appendChild(link);
+    }
+  }
+  addHeadingLinks();
+
+  /** Attaches copy buttons to code blocks in the document,
+   * allowing users to copy code easily. */
+  function attachCopyButtons() {
+    const copyButtonLabel = "Copy";
+    const codeBlocks = Array.from(document.querySelectorAll("pre"));
+
+    for (const codeBlock of codeBlocks) {
+      const wrapper = document.createElement("div");
+      wrapper.style.position = "relative";
+
+      const copyButton = document.createElement("button");
+      copyButton.className =
+        "copy-code absolute right-3 -top-3 rounded bg-skin-card px-2 py-1 text-xs leading-4 text-skin-base font-medium";
+      copyButton.innerHTML = copyButtonLabel;
+      codeBlock.setAttribute("tabindex", "0");
+      codeBlock.appendChild(copyButton);
+
+      // wrap codebock with relative parent element
+      codeBlock?.parentNode?.insertBefore(wrapper, codeBlock);
+      wrapper.appendChild(codeBlock);
+
+      copyButton.addEventListener("click", async () => {
+        await copyCode(codeBlock, copyButton);
+      });
+    }
+
+    async function copyCode(block, button) {
+      const code = block.querySelector("code");
+      const text = code?.innerText;
+
+      await navigator.clipboard.writeText(text ?? "");
+
+      // visual feedback that task is completed
+      button.innerText = "Copied";
+
+      setTimeout(() => {
+        button.innerText = copyButtonLabel;
+      }, 700);
+    }
+  }
+  attachCopyButtons();
+
+  /** Scrolls the document to the top when
+   * the "Back to Top" button is clicked. */
+  function backToTop() {
+    document.querySelector("#back-to-top")?.addEventListener("click", () => {
+      document.body.scrollTop = 0; // For Safari
+      document.documentElement.scrollTop = 0; // For Chrome, Firefox, IE and Opera
+    });
+  }
+  backToTop();
+
+  /* Go to page start after page swap */
+  document.addEventListener("astro:after-swap", () =>
+    window.scrollTo({ left: 0, top: 0, behavior: "instant" })
+  );
+</script>
